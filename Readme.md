@@ -25,7 +25,7 @@ java SDK基于网宿云存储API规范构建,支持1.6及以上版本（目前�
         <dependency>
             <groupId>com.chinanetcenter.wcs.sdk</groupId>
             <artifactId>wcs-java-sdk</artifactId>
-            <version>2.0.1</version>
+            <version>2.0.2</version>
         </dependency>
 
  - Jar包方式（wcs-java-sdk.jar和lib.zip） [Jar下载链接](https://wcsd.chinanetcenter.com/sdk/cnc-java-sdk-wcs.zip)
