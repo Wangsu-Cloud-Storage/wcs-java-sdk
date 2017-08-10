@@ -29,6 +29,9 @@ public class Config {
     public static String LOCAL_IP = "127.0.0.1";
     public static String LOG_FILE_PATH = "";
 
+    //无后缀名文件判断文件类型文件最大值
+    public static long MIMETYPE_FILESIZELIMIT = 52428800; //默认50M
+
     /**
      * 禁止外部直接生成实例<br>
      */
@@ -105,5 +108,14 @@ public class Config {
         GET_URL = getUrl;
         MGR_URL = mgrUrl;
         LOG_FILE_PATH = logFilePath;
+    }
+
+    /**
+     * 初始化不带后缀文件根据文件内容获取文件类型文件最大文件大小
+     *
+     * @param filiLimitSize 文件大小 单位字节
+     */
+    public static void initMimetypeFileLimitSize(long filiLimitSize) {
+        MIMETYPE_FILESIZELIMIT = filiLimitSize;
     }
 }

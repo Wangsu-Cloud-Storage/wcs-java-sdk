@@ -2,6 +2,7 @@ package com.chinanetcenter.api.entity;
 
 /**
  * 上传策略对象<br>
+ * <!--
  * <table border="1px solid">
  * 	<tr>
  * 		<th>字段名</th>
@@ -183,6 +184,7 @@ package com.chinanetcenter.api.entity;
  * 		<td>接收预处理结果通知的URL（必须公网URL地址，能正常响应HTTP/1.1 200 OK）。提示：请在设置persistenOps字段时，完成persistentNotifyUrl字段设置，平台会通过调用persistentNotifyUrl字段设置的URL，来通知您指令处理的结果。</td>
  * 	</tr>
  * </table>
+ * -->
  * @author zouhao
  * @version 1.0
  * @since 2014/02/14

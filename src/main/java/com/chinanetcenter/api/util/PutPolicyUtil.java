@@ -11,11 +11,11 @@ import java.util.Map;
 public class PutPolicyUtil {
 
     /**
-     * 解析输入的参数<br />
-     * 例如命令java -jar wcs-demo-1.0-SNAPSHOT-jar-with-dependencies.jar put testbucket0001 panda002.mp4 D:\Project\WCSdocs\对外接口资料\test.mp4 persistentOps/avthumb/flv/vb/1.25m;vframe/jpg/offset/0<br />
-     * 其中参数persistentOps/avthumb/flv/vb/1.25m;vframe/jpg/offset/0 会被解析为persistentOps/和avthumb/flv/vb/1.25m;vframe/jpg/offset/0两部分<br />
-     * 最终PutPolicy对象中的persistentOps属性会设置为avthumb/flv/vb/1.25m;vframe/jpg/offset/0<br />
-     * PutPolicy其他参数的解析类似上面这个例子<br />
+     * 解析输入的参数<br>
+     * 例如命令java -jar wcs-demo-1.0-SNAPSHOT-jar-with-dependencies.jar put testbucket0001 panda002.mp4 D:\Project\WCSdocs\对外接口资料\test.mp4 persistentOps/avthumb/flv/vb/1.25m;vframe/jpg/offset/0<br>
+     * 其中参数persistentOps/avthumb/flv/vb/1.25m;vframe/jpg/offset/0 会被解析为persistentOps/和avthumb/flv/vb/1.25m;vframe/jpg/offset/0两部分<br>
+     * 最终PutPolicy对象中的persistentOps属性会设置为avthumb/flv/vb/1.25m;vframe/jpg/offset/0<br>
+     * PutPolicy其他参数的解析类似上面这个例子<br>
      * @param args
      * @return PutPolicy对象
      */

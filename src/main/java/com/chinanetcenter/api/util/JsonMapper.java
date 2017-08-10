@@ -19,8 +19,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * 简单封装Jackson，实现JSON String<->Java Object的Mapper.
- * <p/>
+ * 简单封装Jackson，实现JSON String《-》Java Object的Mapper.
+ * <p>
  * 封装不同的输出风格, 使用不同的builder函数创建实例.
  *
  * @author calvin
@@ -70,11 +70,11 @@ public class JsonMapper {
     }
 
     /**
-     * 反序列化POJO或简单Collection如List<String>.
-     * <p/>
+     * 反序列化POJO或简单Collection如List&lt;String&gt;.
+     * <p>
      * 如果JSON字符串为Null或"null"字符串, 返回Null. 如果JSON字符串为"[]", 返回空集合.
-     * <p/>
-     * 如需反序列化复杂Collection如List<MyBean>, 请使用fromJson(String, JavaType)
+     * <p>
+     * 如需反序列化复杂Collection如List&lt;MyBean&gt;, 请使用fromJson(String, JavaType)
      *
      * @see #fromJson(String, com.fasterxml.jackson.databind.JavaType)
      */
@@ -91,7 +91,7 @@ public class JsonMapper {
     }
 
     /**
-     * 反序列化复杂Collection如List<Bean>,
+     * 反序列化复杂Collection如List&lt;Bean&gt;,
      * 先使用createCollectionType()或contructMapType()构造类型, 然后调用本函数.
      */
     @SuppressWarnings("unchecked")

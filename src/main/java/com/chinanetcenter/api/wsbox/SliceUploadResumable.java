@@ -3,10 +3,19 @@ package com.chinanetcenter.api.wsbox;
 import com.chinanetcenter.api.entity.PutPolicy;
 import com.chinanetcenter.api.entity.SliceUploadHttpResult;
 import com.chinanetcenter.api.exception.WsClientException;
-import com.chinanetcenter.api.sliceUpload.*;
+import com.chinanetcenter.api.sliceUpload.BaseBlockUtil;
+import com.chinanetcenter.api.sliceUpload.BlockObject;
+import com.chinanetcenter.api.sliceUpload.BlockUpload;
+import com.chinanetcenter.api.sliceUpload.JSONObjectRet;
+import com.chinanetcenter.api.sliceUpload.PutExtra;
 import com.chinanetcenter.api.util.DateUtil;
+import com.chinanetcenter.api.util.MimetypesUtil;
 import com.chinanetcenter.api.util.TokenUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
@@ -24,16 +33,32 @@ import java.util.concurrent.Executors;
  */
 public class SliceUploadResumable {
 
+    private static final Logger logger = LoggerFactory.getLogger(FileUploadManage.class);
+
     /**
      * 用户初始化ak和sk，sdk自己生成token
      */
     public void execUpload(String bucketName, String fileKey, String filePath, PutPolicy putPolicy, PutExtra putExtra, JSONObjectRet jsonObjectRet) {
-        execUpload(bucketName,fileKey,filePath,putPolicy,putExtra,jsonObjectRet,null);
+        execUpload(bucketName, fileKey, filePath, putPolicy, putExtra, jsonObjectRet, null, false);
+    }
+
+    /**
+     * 用户初始化ak和sk，sdk自己生成token,会自动识别文件类型
+     */
+    public void execUploadForAutoMimeType(String bucketName, String fileKey, String filePath, PutPolicy putPolicy, PutExtra putExtra, JSONObjectRet jsonObjectRet) {
+        execUpload(bucketName, fileKey, filePath, putPolicy, putExtra, jsonObjectRet, null, true);
     }
     /**
      * 用户初始化ak和sk，sdk自己生成token
      */
-    public void execUpload(String bucketName, String fileKey, String filePath, PutPolicy putPolicy, PutExtra putExtra, JSONObjectRet jsonObjectRet,Map<String,String> headMap) {
+    public void execUpload(String bucketName, String fileKey, String filePath, PutPolicy putPolicy, PutExtra putExtra, JSONObjectRet jsonObjectRet, Map<String,String> headMap) {
+        execUpload(bucketName, fileKey, filePath, putPolicy, putExtra, jsonObjectRet, headMap, false);
+    }
+
+    /**
+     * 用户初始化ak和sk，sdk自己生成token
+     */
+    public void execUpload(String bucketName, String fileKey, String filePath, PutPolicy putPolicy, PutExtra putExtra, JSONObjectRet jsonObjectRet, Map<String, String> headMap, boolean isAutoMimeType) {
         RandomAccessFile file = null;
         ExecutorService pool = null;
         try {
@@ -62,7 +87,13 @@ public class SliceUploadResumable {
                     currHeadMap.put(entry.getKey(), entry.getValue());
                 }
             }
-
+            if (isAutoMimeType) {
+                String mimeType = currHeadMap.get("mimeType");
+                if (StringUtils.isEmpty(mimeType)) {
+                    String contentType = MimetypesUtil.getContentType(new File(filePath), filePath);
+                    currHeadMap.put("mimeType", contentType);
+                }
+            }
             int runnerThread = 0;
             for (BlockObject blockObject : putExtra.processes) {
                 runnerThread++;

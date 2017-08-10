@@ -95,7 +95,6 @@ public class OperationManager {
     /**
      * @param bucketName 空间名
      * @param fileKeys   文件名列表
-     * @throws Exception
      */
     public HttpClientResult prefetch(String bucketName, ArrayList<String> fileKeys) throws WsClientException {
         int length = fileKeys.size();
