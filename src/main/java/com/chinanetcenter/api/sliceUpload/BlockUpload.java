@@ -2,6 +2,7 @@ package com.chinanetcenter.api.sliceUpload;
 
 import com.chinanetcenter.api.entity.SliceUploadHttpResult;
 import com.chinanetcenter.api.exception.WsClientException;
+import com.chinanetcenter.api.http.HttpClientUtil;
 import com.chinanetcenter.api.util.Config;
 import org.apache.http.HttpException;
 import org.apache.http.client.ClientProtocolException;
@@ -22,7 +23,7 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
 
     private static Logger logger = Logger.getLogger(BlockUpload.class);
 
-    public BlockUpload(BlockObject blockObject, JSONObjectRet jsonObjectRet, PutExtra putExtra1, Map<String,String> headMap) {
+    public BlockUpload(BlockObject blockObject, JSONObjectRet jsonObjectRet, PutExtra putExtra1, Map<String, String> headMap) {
         super(blockObject, jsonObjectRet, putExtra1, headMap);
     }
 
@@ -94,14 +95,14 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
         CloseableHttpResponse response = null;
         CloseableHttpClient httpClient = null;
         try {
-            httpClient = HttpClients.createDefault();
+            httpClient = HttpClientUtil.createHttpClient(url);
             post = buildUpPost(url);
             if (headMap != null && headMap.size() > 0) {
                 for (Map.Entry<String, String> entry : headMap.entrySet()) {
                     post.setHeader(entry.getKey(), entry.getValue());
                 }
             }
-            if(!post.containsHeader("User-Agent")){
+            if (!post.containsHeader("User-Agent")) {
                 post.addHeader("User-Agent", Config.VERSION_NO);
             }
             long start = blockObject.getOffset() + blockObject.getStart();

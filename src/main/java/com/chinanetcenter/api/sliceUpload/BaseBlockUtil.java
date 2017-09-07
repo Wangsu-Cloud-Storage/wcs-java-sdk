@@ -1,6 +1,7 @@
 package com.chinanetcenter.api.sliceUpload;
 
 import com.chinanetcenter.api.entity.SliceUploadHttpResult;
+import com.chinanetcenter.api.http.HttpClientUtil;
 import com.chinanetcenter.api.util.Config;
 import com.chinanetcenter.api.util.EncodeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -34,8 +35,8 @@ public class BaseBlockUtil {
     public static int MB = 1024 * KB;
     public static int BLOCK_SIZE = 4 * MB;
     public static int CHUNK_SIZE = 256 * KB;
-    public static int TRIED_TIMES = 3;
-    public static int THREAD_NUN = 5;
+    public static int TRIED_TIMES = 1;
+    public static int THREAD_NUN = 1;
     public static boolean isPersist = true;
     public static String properties_file_path = "";
     private static Logger logger = Logger.getLogger(BaseBlockUtil.class);
@@ -141,12 +142,12 @@ public class BaseBlockUtil {
         CloseableHttpResponse ht = null;
         HttpPost httpPost = null;
         try {
-            httpClient = HttpClients.createDefault();
             StringBuffer ctx = new StringBuffer();
             for (BlockObject blockObject : putExtra.processes) {
                 ctx.append(",").append(blockObject.getLastCtx());
             }
             url = buildMkFileUrl(putExtra.totalSize, key, putExtra.xParams);
+            httpClient = HttpClientUtil.createHttpClient(url);
             httpPost = new HttpPost(url);
             if(!httpPost.containsHeader("User-Agent")){
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
