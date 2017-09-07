@@ -25,19 +25,21 @@ import java.util.Map;
 public class SliceUploadDemo {
 
     public static void main(String[] args) throws FileNotFoundException {
-        Config.AK = "a8e986947b7e9a5e82020719ea3d245c72da663d";
-        Config.SK = "7865fc70927f8e0707b2159df1ae85cf406969c7";
+        Config.AK = "<your-ak>";
+        Config.SK = "<your-sk>";
         /**
          * 可在用户管理界面-安全管理-域名查询获取uploadDomain,MgrDomain
          */
-        Config.PUT_URL = "http://localhost:8080";
-        String bucketName = "lidluploadtest1";
-        String fileKey = "99m-1.jpg";
+        Config.PUT_URL = "<your uploadDomain>";
+        String bucketName = "<your-bucket>";
+        String fileKey = "<your fileKey>";
 
-        String srcFilePath = "D://99m.jpg";
+        String srcFilePath = "<your filePaht>";
         BaseBlockUtil.CHUNK_SIZE = 4 * 1024 * 1024;  //每一片为4M，默认256k，减少上传请求
         SliceUploadDemo demo = new SliceUploadDemo();
-//        demo.sliceUpload(bucketName,fileKey,srcFilePath);
+
+        // 自动获取mimeType
+        // demo.sliceUploadForAutoMimeType(bucketName, fileKey, srcFilePath);
         demo.sliceUpload(bucketName, fileKey, srcFilePath);
         /**  第二种方式，key不写到scope里，而是从head指定 用于同一个token可以上传多个文件
         String fileKey2 = "java-sdk/com.toycloud.MeiYe2.apktest";
