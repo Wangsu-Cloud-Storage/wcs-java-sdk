@@ -92,15 +92,15 @@ public class UploadDemo {
         Config.PUT_URL = "your uploadDomain";
         String bucketName = "your-bucket";
         String fileKey = "test.JPG";
-        String fileKeyMp4 = "folder/test.JPG";
+        String fileKeyWithFolder = "folder/test.JPG";
         String srcFilePath = "D:\\testfile\\1m.JPG";
         UploadDemo demo = new UploadDemo();
 	//上传本地文件
 	//普通上传
         demo.uploadFile(bucketName, fileKey, srcFilePath);
 	
-	//上传后需要回调、返回信息
-        //demo.uploadReturnBody(bucketName, fileKeyMp4, srcFilePath);
+	//上传后需要回调、返回信息。指定文件夹
+        //demo.uploadReturnBody(bucketName, fileKeyWithFolder, srcFilePath);
 	
 	//上传指定文件类型，服务端默认按照文件后缀或者文件内容
         //demo.uploadMimeType(bucketName, fileKey, srcFilePath);
