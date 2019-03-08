@@ -106,8 +106,9 @@ public class UploadDemo {
         try {
             String uploadToken = TokenUtil.getUploadToken(putPolicy);
             Map<String, String> paramMap = new HashMap<String, String>();
-            paramMap.put("token", uploadToken);
-            paramMap.put("mimeType", "application/UQ");
+            paramMap.put("token", uploadToken);         //设置token
+            paramMap.put("mimeType", "application/UQ"); //设置mimeType=application/UQ
+            paramMap.put("deadline", "1");              //设置保存1天后删除
             HttpClientResult result = fileUploadManage.upload(paramMap,srcFilePath);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
