@@ -692,11 +692,13 @@ public class FmgrFetchDemo {
             fmgrParam.setBucket(bucketName);
             fmgrParam.setFetchURL("https://wcs.chinanetcenter.com/indexNew/image/pic1.jpg");
             fmgrParam.setFileKey("indexNew/image/pic1.jpg");
+	    fmgrParam.putExtParams("fetchTS", "0");
             list.add(fmgrParam);
             FmgrParam fmgrParam2 = new FmgrParam();
             fmgrParam2.setBucket(bucketName);
-            fmgrParam2.setFetchURL("https://wcs.chinanetcenter.com/indexNew/image/pic2.jpg");
-            fmgrParam2.setFileKey("indexNew/image/pic2.jpg");
+            fmgrParam2.setFetchURL("https://wcs.chinanetcenter.com/indexNew/image/pic2.m3u8");
+            fmgrParam2.setFileKey("indexNew/image/pic2.m3u8");
+	    fmgrParam.putExtParams("fetchTS", "0");
             list.add(fmgrParam2);
             String notifyURL = "http://demo1/notifyUrl";  //通知地址，转码成功后会回调此地址
             String force = "1";
