@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by fuyz on 2016/9/1.
- * stat文件信息
+ * 用途描述：高级资源管理-删除m3u8文件
+ * Created by chenql on 2018/4/3.
  */
-public class FmgrFetchDemo {
+public class FmgrDeletem3u8Demo {
+
     public static void main(String[] args) {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
@@ -27,19 +28,17 @@ public class FmgrFetchDemo {
             List<FmgrParam> list = new ArrayList<FmgrParam>();
             FmgrParam fmgrParam = new FmgrParam();
             fmgrParam.setBucket(bucketName);
-            fmgrParam.setFetchURL("https://wcs.chinanetcenter.com/indexNew/image/pic1.jpg");
-            fmgrParam.setFileKey("indexNew/image/pic1.jpg");
+            fmgrParam.setDeletets("1");
+            fmgrParam.setFileKey("mytest1.m3u8");
             list.add(fmgrParam);
             FmgrParam fmgrParam2 = new FmgrParam();
             fmgrParam2.setBucket(bucketName);
-            fmgrParam2.setFetchURL("https://wcs.chinanetcenter.com/indexNew/image/pic2.jpg");
-            fmgrParam2.setFileKey("indexNew/image/pic2.jpg");
-            fmgrParam2.putExtParams("fetchTS", "0");
+            fmgrParam2.setDeletets("0");
+            fmgrParam2.setFileKey("mytest2.m3u8");
             list.add(fmgrParam2);
             String notifyURL = "http://demo1/notifyUrl";  //通知地址，转码成功后会回调此地址
-            String force = "1";
             String separate = "1";
-            HttpClientResult result = fileManageCommand.fmgrFetch(list, notifyURL, force, separate);
+            HttpClientResult result = fileManageCommand.fmgrDeleteM3U8(list, notifyURL, separate);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();

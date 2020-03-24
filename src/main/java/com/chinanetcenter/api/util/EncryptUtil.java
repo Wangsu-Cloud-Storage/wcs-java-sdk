@@ -12,7 +12,7 @@ public class EncryptUtil {
         byte[] keyBytes = key.getBytes();
         SecretKeySpec signingKey = new SecretKeySpec(keyBytes, "HmacSHA1");
         Mac mac;
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         try {
             mac = Mac.getInstance("HmacSHA1");
             mac.init(signingKey);

@@ -35,18 +35,12 @@ public class UploadDemo {
         String fileKeyMp4 = "folder/test.JPG";
         String srcFilePath = "D:\\testfile\\1m.JPG";
         UploadDemo demo = new UploadDemo();
-//        demo.uploadFile(bucketName, fileKey, srcFilePath);
-//        Config.initMimetypeFileLimitSize(50*1024*1024);
+        demo.uploadFile(bucketName, fileKey, srcFilePath);
         FileInputStream in = new FileInputStream(new File(srcFilePath));
-//        demo.uploadFile(bucketName, fileKey, in);
-//        demo.uploadReturnBody(bucketName, fileKeyMp4, srcFilePath);
-//        demo.uploadMimeType(bucketName, fileKey, srcFilePath);
-//        demo.uploadPersistent(bucketName, fileKey, srcFilePath);
-//        demo.uploadFileForAutoMimeType(bucketName, fileKey, srcFilePath);
-        demo.uploadFileForAutoMimeType(bucketName, fileKey, in);
-
-
-
+        demo.uploadFile(bucketName, fileKey, in);
+        demo.uploadReturnBody(bucketName, fileKeyMp4, srcFilePath);
+        demo.uploadMimeType(bucketName, fileKey, srcFilePath);
+        demo.uploadPersistent(bucketName, fileKey, srcFilePath);
     }
 
     /**
@@ -106,9 +100,8 @@ public class UploadDemo {
         try {
             String uploadToken = TokenUtil.getUploadToken(putPolicy);
             Map<String, String> paramMap = new HashMap<String, String>();
-            paramMap.put("token", uploadToken);         //设置token
-            paramMap.put("mimeType", "application/UQ"); //设置mimeType=application/UQ
-            paramMap.put("deadline", "1");              //设置保存1天后删除
+            paramMap.put("token", uploadToken);
+            paramMap.put("mimeType", "application/UQ");
             HttpClientResult result = fileUploadManage.upload(paramMap,srcFilePath);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
@@ -131,32 +124,6 @@ public class UploadDemo {
         putPolicy.setReturnBody(returnBody);
         try {
             HttpClientResult result = fileUploadManage.upload(bucketName,fileKey,srcFilePath,putPolicy);
-            System.out.println(result.getStatus() + ":" + result.getResponse());
-        } catch (WsClientException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 通过本地的文件路径上传文件,会自动识别文件类型
-     * 默认覆盖上传
-     */
-    public void uploadFileForAutoMimeType(String bucketName, String fileKey, String srcFilePath) {
-        try {
-            HttpClientResult result = fileUploadManage.uploadForAutoMimeType(bucketName, fileKey, srcFilePath);
-            System.out.println(result.getStatus() + ":" + result.getResponse());
-        } catch (WsClientException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 通过文件流上传文件，方法里会关闭InputStream，会自动识别文件类型
-     * 默认覆盖上传
-     */
-    public void uploadFileForAutoMimeType(String bucketName, String fileKey, InputStream in) {
-        try {
-            HttpClientResult result = fileUploadManage.uploadForAutoMimeType(bucketName, fileKey, in);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();

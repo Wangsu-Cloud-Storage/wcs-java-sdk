@@ -186,7 +186,7 @@ public class HttpClientUtil {
             is = het.getContent();
             br = new BufferedReader(new InputStreamReader(is, "utf8"));
             String readLine;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while ((readLine = br.readLine()) != null) {
                 sb.append(readLine);
             }
@@ -235,7 +235,7 @@ public class HttpClientUtil {
             InputStream is = het.getContent();
             BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf8"));
             String readLine;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while ((readLine = br.readLine()) != null) {
                 sb.append(readLine);
             }
@@ -309,7 +309,7 @@ public class HttpClientUtil {
             is = het.getContent();
             br = new BufferedReader(new InputStreamReader(is, "utf8"));
             String readLine;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while ((readLine = br.readLine()) != null) {
                 sb.append(readLine);
             }
@@ -383,7 +383,7 @@ public class HttpClientUtil {
             is = het.getContent();
             br = new BufferedReader(new InputStreamReader(is, "utf8"));
             String readLine;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while ((readLine = br.readLine()) != null) {
                 sb.append(readLine);
             }
@@ -430,7 +430,7 @@ public class HttpClientUtil {
             is = het.getContent();
             br = new BufferedReader(new InputStreamReader(is, "utf8"));
             String readLine;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while ((readLine = br.readLine()) != null) {
                 sb.append(readLine);
             }

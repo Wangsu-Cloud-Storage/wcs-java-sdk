@@ -5,10 +5,7 @@ import com.chinanetcenter.api.entity.SliceUploadHttpResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.sliceUpload.BaseBlockUtil;
 import com.chinanetcenter.api.sliceUpload.JSONObjectRet;
-import com.chinanetcenter.api.util.Config;
-import com.chinanetcenter.api.util.DateUtil;
-import com.chinanetcenter.api.util.EncodeUtils;
-import com.chinanetcenter.api.util.WetagUtil;
+import com.chinanetcenter.api.util.*;
 import com.chinanetcenter.api.wsbox.SliceUploadResumable;
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -25,22 +22,19 @@ import java.util.Map;
 public class SliceUploadDemo {
 
     public static void main(String[] args) throws FileNotFoundException {
-        Config.AK = "<your-ak>";
-        Config.SK = "<your-sk>";
+        Config.AK = "your-ak";
+        Config.SK = "your-sk";
         /**
          * 可在用户管理界面-安全管理-域名查询获取uploadDomain,MgrDomain
          */
-        Config.PUT_URL = "<your uploadDomain>";
-        String bucketName = "<your-bucket>";
-        String fileKey = "<your fileKey>";
+        Config.PUT_URL = "your uploadDomain";
+        String bucketName = "your-bucket";
+        String fileKey = "java-sdk/com.toycloud.MeiYe.apk";
 
-        String srcFilePath = "<your filePaht>";
+        String srcFilePath = "D:\\testfile\\test001\\com.toycloud.MeiYe.apk";
         BaseBlockUtil.CHUNK_SIZE = 4 * 1024 * 1024;  //每一片为4M，默认256k，减少上传请求
         SliceUploadDemo demo = new SliceUploadDemo();
-
-        // 自动获取mimeType
-        // demo.sliceUploadForAutoMimeType(bucketName, fileKey, srcFilePath);
-        demo.sliceUpload(bucketName, fileKey, srcFilePath);
+        demo.sliceUpload(bucketName,fileKey,srcFilePath);
         /**  第二种方式，key不写到scope里，而是从head指定 用于同一个token可以上传多个文件
         String fileKey2 = "java-sdk/com.toycloud.MeiYe2.apktest";
         String mimeType = "application/vnd.android.package-archive";
@@ -69,23 +63,6 @@ public class SliceUploadDemo {
         headMap.put("mimeType",mimeType);
         headMap.put("key", EncodeUtils.urlsafeEncode(fileKey));
         sliceUploadResumable.execUpload(bucketName, fileKey, filePath, putPolicy, null, jsonObjectRet,headMap);
-    }
-
-    /**
-     * 分片上传，会自动识别文件类型
-     *
-     * @param bucketName
-     * @param fileKey
-     * @param filePath
-     */
-    public void sliceUploadForAutoMimeType(final String bucketName, final String fileKey, final String filePath) {
-        PutPolicy putPolicy = new PutPolicy();
-        putPolicy.setScope(bucketName + ":" + fileKey);
-        putPolicy.setOverwrite(1);
-        putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
-        JSONObjectRet jsonObjectRet = getJSONObjectRet(bucketName, fileKey, filePath);
-        SliceUploadResumable sliceUploadResumable = new SliceUploadResumable();
-        sliceUploadResumable.execUploadForAutoMimeType(bucketName, fileKey, filePath, putPolicy, null, jsonObjectRet);
     }
 
     public JSONObjectRet getJSONObjectRet(final String bucketName,final String fileKey,final String filePath){

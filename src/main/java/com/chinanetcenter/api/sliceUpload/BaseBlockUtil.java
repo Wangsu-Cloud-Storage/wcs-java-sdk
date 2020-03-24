@@ -16,11 +16,18 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -35,8 +42,8 @@ public class BaseBlockUtil {
     public static int MB = 1024 * KB;
     public static int BLOCK_SIZE = 4 * MB;
     public static int CHUNK_SIZE = 256 * KB;
-    public static int TRIED_TIMES = 1;
-    public static int THREAD_NUN = 1;
+    public static int TRIED_TIMES = 3;
+    public static int THREAD_NUN = 5;
     public static boolean isPersist = true;
     public static String properties_file_path = "";
     private static Logger logger = Logger.getLogger(BaseBlockUtil.class);
@@ -142,7 +149,7 @@ public class BaseBlockUtil {
         CloseableHttpResponse ht = null;
         HttpPost httpPost = null;
         try {
-            StringBuffer ctx = new StringBuffer();
+            StringBuilder ctx = new StringBuilder();
             for (BlockObject blockObject : putExtra.processes) {
                 ctx.append(",").append(blockObject.getLastCtx());
             }
@@ -165,7 +172,7 @@ public class BaseBlockUtil {
             InputStream is = het.getContent();
             BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf8"));
             String readLine;
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             while ((readLine = br.readLine()) != null) {
                 sb.append(readLine);
             }
@@ -206,7 +213,7 @@ public class BaseBlockUtil {
     }
 
     public String buildMkFileUrl(long length, String key, Map<String, String> params) {
-        StringBuffer url = new StringBuffer();
+        StringBuilder url = new StringBuilder();
         url.append(Config.PUT_URL).append("/mkfile/").append(length);
         if (null != key) {
             url.append("/key/").append(new String(EncodeUtils.urlsafeEncodeBytes(key.getBytes())));

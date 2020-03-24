@@ -1,6 +1,10 @@
 package com.chinanetcenter.api.util;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.zip.CRC32;
@@ -244,7 +248,7 @@ public class WetagUtil {
     }
 
     private static String toHex(byte buffer[]) {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         String s;
         for (byte aBuffer : buffer) {
             s = Integer.toHexString((int) aBuffer & 0xff);

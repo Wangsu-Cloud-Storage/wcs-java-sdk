@@ -23,7 +23,7 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
 
     private static Logger logger = Logger.getLogger(BlockUpload.class);
 
-    public BlockUpload(BlockObject blockObject, JSONObjectRet jsonObjectRet, PutExtra putExtra1, Map<String, String> headMap) {
+    public BlockUpload(BlockObject blockObject, JSONObjectRet jsonObjectRet, PutExtra putExtra1, Map<String,String> headMap) {
         super(blockObject, jsonObjectRet, putExtra1, headMap);
     }
 
@@ -102,7 +102,7 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
                     post.setHeader(entry.getKey(), entry.getValue());
                 }
             }
-            if (!post.containsHeader("User-Agent")) {
+            if(!post.containsHeader("User-Agent")){
                 post.addHeader("User-Agent", Config.VERSION_NO);
             }
             long start = blockObject.getOffset() + blockObject.getStart();
