@@ -482,9 +482,8 @@ public class ListDemo {
         int querySize = 10;
         String prex = "";
         HttpClientResult result = fileManageCommand.fileList(bucket, String.valueOf(querySize), prex, "", "");
-//      System.out.println(result.getStatus() + ":" + result.getInnerResponse());
         while (result != null && result.getStatus() == 200 && StringUtil.isNotEmpty(result.getResponse()) && !"{}".equals(result.getResponse())) {
-            ObjectMapper objectMapper = new ObjectMapper();
+            JsonMapper objectMapper = new JsonMapper();
             try {
                 FileListObject fileListObject = objectMapper.readValue(result.getResponse(), FileListObject.class);
                 for (String folder : fileListObject.getCommonPrefixes()) {
