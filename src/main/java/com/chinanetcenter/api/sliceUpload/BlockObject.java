@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.ByteArrayInputStream;
 import java.io.RandomAccessFile;
 
 /**
@@ -22,6 +23,9 @@ public class BlockObject {
     private String lastCtx;
     private String token;
     private long successLength;
+    private byte[] data;
+    private ByteArrayInputStream blockBuffer;
+
 
     public BlockObject(RandomAccessFile file, String bucketName, String fileKey, int blockIdx, int blockLen) {
         this.file = file;
@@ -36,6 +40,15 @@ public class BlockObject {
 
     public BlockObject(JsonNode obj) {
         parse(obj);
+    }
+
+    public BlockObject(byte[] data, String bucketName, String fileKey, int blockIdx, int blockLen) {
+        this.data = data;
+        this.bucketName = bucketName;
+        this.fileKey = fileKey;
+        this.blockIdx = blockIdx;
+        this.blockLen = blockLen;
+        this.blockBuffer = new ByteArrayInputStream(this.data);
     }
 
     public void setCommonParam(RandomAccessFile file, String bucketName, String fileKey) {
@@ -138,5 +151,21 @@ public class BlockObject {
 
     public void setSuccessLength(long successLength) {
         this.successLength = successLength;
+    }
+
+    public byte[] getData() {
+        return data;
+    }
+
+    public void setData(byte[] data) {
+        this.data = data;
+    }
+
+    public ByteArrayInputStream getBlockBuffer() {
+        return blockBuffer;
+    }
+
+    public void setBlockBuffer(ByteArrayInputStream blockBuffer) {
+        this.blockBuffer = blockBuffer;
     }
 }

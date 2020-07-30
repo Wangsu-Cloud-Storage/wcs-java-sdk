@@ -323,4 +323,23 @@ public class OperationManager {
         headMap.put("Authorization", listToken);
         return HttpClientUtil.httpGet(url, headMap);
     }
+
+    public HttpClientResult download(String downloadDomain, String fileKey, String filePath, Map<String, String> requestHeaders) throws WsClientException {
+        if (StringUtils.isEmpty(downloadDomain)) {
+            throw new WsClientException(-1, "Parameter downloadDomain cannot be empty");
+        }
+        if (StringUtils.isEmpty(fileKey)) {
+            throw new WsClientException(-1, "Parameter fileKey cannot be empty");
+        }
+        String url = downloadDomain + "/" + fileKey;
+        if (StringUtils.isEmpty(filePath)) {
+            return HttpClientUtil.httpGetContentStream(url, requestHeaders);
+        } else {
+            return HttpClientUtil.httpGet(url, filePath, requestHeaders);
+        }
+    }
+
+    public HttpClientResult download(String downloadDomain, String fileKey, Map<String, String> requestHeaders) throws WsClientException {
+        return download(downloadDomain, fileKey, null, requestHeaders);
+    }
 }

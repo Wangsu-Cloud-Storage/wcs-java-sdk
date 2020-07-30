@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -116,5 +117,43 @@ public class SliceUploadDemo {
                 BaseBlockUtil.savePutExtra(bucketName, fileKey, obj);
             }
         };
+    }
+
+    public void sliceUpload(final String bucketName, final String fileKey, InputStream inputStream) {
+        PutPolicy putPolicy = new PutPolicy();
+        putPolicy.setScope(bucketName + ":" + fileKey);
+        putPolicy.setOverwrite(1);
+        putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
+        JSONObjectRet jsonObjectRet = new JSONObjectRet() {
+            @Override
+            public void onSuccess(JsonNode obj) {
+                System.out.println("上传成功");
+            }
+
+            @Override
+            public void onSuccess(byte[] body) {
+            }
+
+            @Override
+            public void onFailure(Exception ex) {
+                if (ex instanceof WsClientException) {
+                    WsClientException wsClientException = (WsClientException) ex;
+                    System.out.println(wsClientException.code + ":" + wsClientException.getMessage());
+                } else {
+                    ex.printStackTrace();
+                }
+                System.out.println("上传出错，" + ex.getMessage());
+            }
+
+            @Override
+            public void onProcess(long current, long total) {
+            }
+
+            @Override
+            public void onPersist(JsonNode obj) {
+            }
+        };
+        SliceUploadResumable sliceUploadResumable = new SliceUploadResumable();
+        sliceUploadResumable.execUpload(bucketName, fileKey, inputStream, putPolicy, jsonObjectRet);
     }
 }

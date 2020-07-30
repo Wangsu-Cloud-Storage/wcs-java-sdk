@@ -17,7 +17,6 @@ java SDK基于网宿云存储API规范构建,支持1.6及以上版本（目前�
      - [更新镜像资源](#更新镜像资源)
    - [音视频操作](#音视频操作)
    - [抓取资源](#抓取资源)
-   - [下载资源](#下载资源)
 
 ### 使用指南
 #### 准备开发环境
@@ -705,28 +704,6 @@ public class FmgrFetchDemo {
             String separate = "1";
             HttpClientResult result = fileManageCommand.fmgrFetch(list, notifyURL, force, separate);
             System.out.println(result.getStatus() + ":" + result.getResponse());
-        } catch (WsClientException e) {
-            e.printStackTrace();
-        }
-    }
-}
-```
-
-#### 下载资源
-提供从指定域名和资源名下载资源。
-```
-/**
- * 下载文件
- */
-public class DownloadDemo {
-    public static void main(String[] args) {
-        String downloadDomain = "your download domain";
-        String fileKey = "file name";
-        String filePath = "local path";
-        OperationManager fileManageCommand = new OperationManager();
-        try {
-            HttpClientResult result = fileManageCommand.download(downloadDomain, fileKey, filePath, null);
-            System.out.println(result.getStatus());
         } catch (WsClientException e) {
             e.printStackTrace();
         }

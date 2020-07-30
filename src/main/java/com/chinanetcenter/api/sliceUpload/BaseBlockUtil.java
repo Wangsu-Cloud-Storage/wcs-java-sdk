@@ -19,15 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -50,11 +42,11 @@ public class BaseBlockUtil {
     public BlockObject blockObject;
     public JSONObjectRet jsonObjectRet;
     public PutExtra putExtra;
-    protected Map<String,String> headMap;
+    protected Map<String, String> headMap;
     protected int REQUEST_TIMEOUT = 60 * 1000;  //设置请求超时60秒钟
     protected int SO_TIMEOUT = 300 * 1000;       //设置等待数据超时时间5分钟
 
-    public BaseBlockUtil(BlockObject blockObject, JSONObjectRet jsonObjectRet, PutExtra putExtra, Map<String,String> headMap) {
+    public BaseBlockUtil(BlockObject blockObject, JSONObjectRet jsonObjectRet, PutExtra putExtra, Map<String, String> headMap) {
         this.blockObject = blockObject;
         this.jsonObjectRet = jsonObjectRet;
         this.putExtra = putExtra;
@@ -143,20 +135,27 @@ public class BaseBlockUtil {
         return Config.PUT_URL + "/mkblk/" + blockObject.getBlockLen() + "/" + blockObject.getBlockIdx();
     }
 
-    public SliceUploadHttpResult mkFile(Map<String,String> headMap, String key, PutExtra putExtra, int time) {
+    public SliceUploadHttpResult mkFile(Map<String, String> headMap, String key, PutExtra putExtra, int time) {
         String url;
         CloseableHttpClient httpClient = null;
         CloseableHttpResponse ht = null;
         HttpPost httpPost = null;
         try {
             StringBuilder ctx = new StringBuilder();
-            for (BlockObject blockObject : putExtra.processes) {
-                ctx.append(",").append(blockObject.getLastCtx());
+            if (putExtra.streamProcesses != null && putExtra.streamProcesses.size() > 0) {
+                for (BlockObject blockObject : putExtra.streamProcesses) {
+                    ctx.append(",").append(blockObject.getLastCtx());
+                }
+            } else {
+                for (BlockObject blockObject : putExtra.processes) {
+                    ctx.append(",").append(blockObject.getLastCtx());
+                }
             }
+
             url = buildMkFileUrl(putExtra.totalSize, key, putExtra.xParams);
             httpClient = HttpClientUtil.createHttpClient(url);
             httpPost = new HttpPost(url);
-            if(!httpPost.containsHeader("User-Agent")){
+            if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
             }
             if (headMap != null && headMap.size() > 0) {
@@ -181,7 +180,7 @@ public class BaseBlockUtil {
 
             SliceUploadHttpResult ret = new SliceUploadHttpResult(ht.getStatusLine().getStatusCode(), sb.toString());
             // 401 上传数据块校验出错 ； 412 服务器块拼接文件出错，需要重新上传文件;  500服务端失败;  579 回调失败，不再重新makefile;
-            if ((ret.status == 401 || ret.status == 412 || (ret.status / 100 == 5 && ret.status != 579 ))
+            if ((ret.status == 401 || ret.status == 412 || (ret.status / 100 == 5 && ret.status != 579))
                     && time < BaseBlockUtil.TRIED_TIMES) {
                 return mkFile(headMap, key, putExtra, time + 1);
             }
@@ -292,6 +291,7 @@ public class BaseBlockUtil {
                     consumed = true;
                 }
             }
+
             @Override
             public boolean isStreaming() {
                 return !consumed;
@@ -348,4 +348,77 @@ public class BaseBlockUtil {
         return crc32.getValue();
     }
 
+    protected String getMD5String(byte[] data, int offset, int length) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(data, offset, length);
+            return toHex(md.digest());
+        } catch (IllegalStateException e) {
+            return null;
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+    }
+
+    public long crc32(byte[] data, int offset, int length) {
+        CRC32 crc32 = new CRC32();
+        crc32.update(data, offset, length);
+        return crc32.getValue();
+    }
+
+    public HttpEntity buildHttpEntity(final ByteArrayInputStream blockBuffer, final long offset, final int len) {
+        AbstractHttpEntity entity = new AbstractHttpEntity() {
+            private boolean consumed = false;
+            private long length = len;
+
+            @Override
+            public boolean isRepeatable() {
+                return true;
+            }
+
+            @Override
+            public long getContentLength() {
+                return length;
+            }
+
+            @Override
+            public InputStream getContent() throws IOException,
+                    IllegalStateException {
+                return null;
+            }
+
+            @Override
+            public void writeTo(OutputStream os) throws IOException {
+                consumed = false;
+                try {
+                    byte[] b = new byte[1024 * 4];
+                    long len;
+                    int totalLength = 0;
+                    while (true) {
+                        if ((length - totalLength) < b.length) {
+                            int lastLength = (int) (length - totalLength);
+                            b = new byte[lastLength];
+                        }
+                        len = blockBuffer.read(b);
+                        if (len == -1 || totalLength >= length) {
+                            break;
+                        }
+                        os.write(b, 0, (int) len);
+                        totalLength += len;
+                    }
+                    os.flush();
+                } finally {
+                    os.close();
+                    consumed = true;
+                }
+            }
+
+            @Override
+            public boolean isStreaming() {
+                return !consumed;
+            }
+        };
+        entity.setContentType("application/octet-stream");
+        return entity;
+    }
 }

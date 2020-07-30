@@ -3,6 +3,8 @@ package com.chinanetcenter.api.entity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.io.InputStream;
+
 /**
  * HTTP返回结果<br>
  * status  HTTP状态码，比如200,500,404
@@ -28,6 +30,8 @@ public class HttpClientResult {
     public JsonNode responseObject;
 
     private String innerResponse;
+
+    private InputStream content;
 
     public HttpClientResult() {
     }
@@ -99,6 +103,14 @@ public class HttpClientResult {
 
     public void setResponseObject(JsonNode responseObject) {
         this.responseObject = responseObject;
+    }
+
+    public InputStream getContent() {
+        return content;
+    }
+
+    public void setContent(InputStream content) {
+        this.content = content;
     }
 
     @Override

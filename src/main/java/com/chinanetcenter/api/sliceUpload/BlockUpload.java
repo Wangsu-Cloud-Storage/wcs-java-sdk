@@ -4,6 +4,7 @@ import com.chinanetcenter.api.entity.SliceUploadHttpResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.http.HttpClientUtil;
 import com.chinanetcenter.api.util.Config;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -53,7 +54,9 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
                 }
             } finally {
                 if (isOut) {
-                    blockObject.file.close();
+                    if (blockObject.getData() == null) {
+                        blockObject.file.close();
+                    }
                 }
             }
         }
@@ -105,8 +108,15 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
             if(!post.containsHeader("User-Agent")){
                 post.addHeader("User-Agent", Config.VERSION_NO);
             }
-            long start = blockObject.getOffset() + blockObject.getStart();
-            post.setEntity(buildHttpEntity(blockObject.file, start, len));
+
+            if (blockObject.getData() != null) {
+                long start = blockObject.getStart();
+                HttpEntity httpEntity = buildHttpEntity(blockObject.getBlockBuffer(), start, len);
+                post.setEntity(httpEntity);
+            } else {
+                long start = blockObject.getOffset() + blockObject.getStart();
+                post.setEntity(buildHttpEntity(blockObject.file, start, len));
+            }
             response = httpClient.execute(post);
 
             SliceUploadHttpResult ret = handleResult(response);
@@ -139,26 +149,46 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
                 throw new WsClientException(result.getStatus(), url + "connect result error, stauts :" + result.getStatus() + " reason:" + (result.response == null ? "" : result.response));
             }
         } else {
-            long crc32 = buildCrc32(len);
-            String checkSum = getFileMD5String(len);
-            // 上传的数据 CRC32 或md5校验不一致。
-            if (result.getCrc32() != crc32 || !result.getChecksum().equals(checkSum)) {
-                if (time < TRIED_TIMES) {
-                    return upload(url, len, time + 1);
+            if (blockObject.getData() != null) {
+                //流式上传
+                long crc32 = crc32(blockObject.getData(), (int) blockObject.getStart(), len);
+                String checkSum = getMD5String(blockObject.getData(), (int) blockObject.getStart(), len);
+                // 上传的数据 CRC32 或md5校验不一致。
+                if (result.getCrc32() != crc32 || !result.getChecksum().equals(checkSum)) {
+                    if (time < TRIED_TIMES) {
+                        return upload(url, len, time + 1);
+                    } else {
+                        System.out.println("result.getCrc32():" + result.getCrc32() + ",crc32:" + crc32);
+                        throw new HttpException("406 inner block's crc32 do not match." + (result.response == null ? "" : result.response));
+                    }
                 } else {
-                    System.out.println("result.getCrc32():" + result.getCrc32() + ",crc32:" + crc32);
-                    throw new HttpException("406 inner block's crc32 do not match." + (result.response == null ? "" : result.response));
+                    //修改successLength和start的值
+                    blockObject.addSuccessLength(len);
+                    blockObject.setLastCtx(result.getCtx());
+                    return result;
                 }
             } else {
-                blockObject.addSuccessLength(len);
-                blockObject.setLastCtx(result.getCtx());
-                jsonObjectRet.onPersist(putExtra.toJSON());
-                long current = 0;
-                for (BlockObject blockObject1 : putExtra.processes) {
-                    current += blockObject1.getStart();
+                long crc32 = buildCrc32(len);
+                String checkSum = getFileMD5String(len);
+                // 上传的数据 CRC32 或md5校验不一致。
+                if (result.getCrc32() != crc32 || !result.getChecksum().equals(checkSum)) {
+                    if (time < TRIED_TIMES) {
+                        return upload(url, len, time + 1);
+                    } else {
+                        System.out.println("result.getCrc32():" + result.getCrc32() + ",crc32:" + crc32);
+                        throw new HttpException("406 inner block's crc32 do not match." + (result.response == null ? "" : result.response));
+                    }
+                } else {
+                    blockObject.addSuccessLength(len);
+                    blockObject.setLastCtx(result.getCtx());
+                    jsonObjectRet.onPersist(putExtra.toJSON());
+                    long current = 0;
+                    for (BlockObject blockObject1 : putExtra.processes) {
+                        current += blockObject1.getStart();
+                    }
+                    jsonObjectRet.onProcess(current, putExtra.totalSize);
+                    return result;
                 }
-                jsonObjectRet.onProcess(current, putExtra.totalSize);
-                return result;
             }
         }
     }

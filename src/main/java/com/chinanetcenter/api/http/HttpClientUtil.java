@@ -33,12 +33,7 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.CharsetUtils;
 
 import javax.net.ssl.SSLContext;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -448,4 +443,108 @@ public class HttpClientUtil {
             }
         }
     }
+
+    public static HttpClientResult httpGet(String url, String filePath, Map<String, String> requestHeaders) throws WsClientException {
+        HttpGet httpGet = null;
+        CloseableHttpResponse ht = null;
+        InputStream is = null;
+        FileOutputStream fos = null;
+        try {
+            httpGet = new HttpGet(url);
+            if (requestHeaders != null && requestHeaders.size() > 0) {
+                for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
+                    httpGet.setHeader(entry.getKey(), entry.getValue());
+                }
+            }
+
+            if (!httpGet.containsHeader("User-Agent")) {
+                httpGet.addHeader("User-Agent", Config.VERSION_NO);
+            }
+
+            CloseableHttpClient hc = createHttpClient(url);
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
+            httpGet.setConfig(requestConfig);
+            ht = hc.execute(httpGet);
+            int status = ht.getStatusLine().getStatusCode();
+            HttpEntity het = ht.getEntity();
+            is = het.getContent();
+
+            if (status == 200) {
+                int size;
+                byte[] buf = new byte[1024 * 1024];
+                File tempFile = new File(filePath);
+                File parentFile = tempFile.getParentFile();
+                if (null != parentFile && !parentFile.exists()) {
+                    parentFile.mkdirs();
+                }
+                fos = new FileOutputStream(filePath);
+                while ((size = is.read(buf)) != -1) {
+                    fos.write(buf, 0, size);
+                }
+                return new HttpClientResult(status);
+            } else {
+                BufferedReader br = new BufferedReader(new InputStreamReader(is));
+                String readLine;
+                StringBuilder sb = new StringBuilder();
+                while ((readLine = br.readLine()) != null) {
+                    sb.append(readLine);
+                }
+                br.close();
+                return new HttpClientResult(url, status, sb.toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new WsClientException(e);
+        } finally {
+            if (httpGet != null) {
+                httpGet.releaseConnection();
+            }
+            IOUtils.closeQuietly(ht);
+            IOUtils.closeQuietly(is);
+            IOUtils.closeQuietly(fos);
+        }
+    }
+
+    public static HttpClientResult httpGetContentStream(String url, Map<String, String> requestHeaders) throws WsClientException {
+        HttpGet httpGet = null;
+        CloseableHttpResponse ht = null;
+        try {
+            httpGet = new HttpGet(url);
+            if (requestHeaders != null && requestHeaders.size() > 0) {
+                for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
+                    httpGet.setHeader(entry.getKey(), entry.getValue());
+                }
+            }
+
+            if (!httpGet.containsHeader("User-Agent")) {
+                httpGet.addHeader("User-Agent", Config.VERSION_NO);
+            }
+
+            CloseableHttpClient hc = createHttpClient(url);
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
+            httpGet.setConfig(requestConfig);
+            ht = hc.execute(httpGet);
+            int status = ht.getStatusLine().getStatusCode();
+            HttpEntity het = ht.getEntity();
+
+            if (status == 200) {
+                HttpClientResult httpClientResult = new HttpClientResult(status);
+                httpClientResult.setContent(het.getContent());
+                return httpClientResult;
+            } else {
+                BufferedReader br = new BufferedReader(new InputStreamReader(het.getContent()));
+                String readLine;
+                StringBuilder sb = new StringBuilder();
+                while ((readLine = br.readLine()) != null) {
+                    sb.append(readLine);
+                }
+                br.close();
+                return new HttpClientResult(url, status, sb.toString());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new WsClientException(e);
+        }
+    }
+
 }

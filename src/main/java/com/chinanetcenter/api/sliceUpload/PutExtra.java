@@ -9,10 +9,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by fuyz on 2014/8/18.
@@ -24,6 +21,8 @@ public class PutExtra {
     public String mimeType;
     public long totalSize;
     public String uploadBatch;
+
+    public ArrayList<BlockObject> streamProcesses;
 
     public PutExtra() {
     }
