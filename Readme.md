@@ -163,7 +163,7 @@ public class UploadDemo {
     }
 
     /**
-     * 上传指定文件类型，服务端默认按照文件后缀或者文件内容
+     * 上传指定文件类型、指定文件保存时间，服务端默认按照文件后缀或者文件内容
      * 指定了mimeType，在下载的时候Content-type会指定该类型
      */
     public void uploadMimeType(String bucketName,String fileKey,String srcFilePath){
@@ -176,6 +176,7 @@ public class UploadDemo {
             Map<String, String> paramMap = new HashMap<String, String>();
             paramMap.put("token", uploadToken);
             paramMap.put("mimeType", "application/UQ");
+	    paramMap.put("deadline", 365);
             HttpClientResult result = fileUploadManage.upload(paramMap,srcFilePath);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
