@@ -17,7 +17,8 @@ import org.apache.http.entity.AbstractHttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.security.MessageDigest;
@@ -38,7 +39,7 @@ public class BaseBlockUtil {
     public static int THREAD_NUN = 5;
     public static boolean isPersist = true;
     public static String properties_file_path = "";
-    private static Logger logger = Logger.getLogger(BaseBlockUtil.class);
+    private static Logger logger = LogManager.getLogger(BaseBlockUtil.class);
     public BlockObject blockObject;
     public JSONObjectRet jsonObjectRet;
     public PutExtra putExtra;

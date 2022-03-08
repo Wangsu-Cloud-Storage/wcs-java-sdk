@@ -10,8 +10,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
  */
 public class BlockUpload extends BaseBlockUtil implements Callable {
 
-    private static Logger logger = Logger.getLogger(BlockUpload.class);
+    private static Logger logger = LogManager.getLogger(BlockUpload.class);
 
     public BlockUpload(BlockObject blockObject, JSONObjectRet jsonObjectRet, PutExtra putExtra1, Map<String,String> headMap) {
         super(blockObject, jsonObjectRet, putExtra1, headMap);
