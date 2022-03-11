@@ -269,6 +269,11 @@ public class SliceUploadDemo {
         String srcFilePath = "D:\\testfile\\test001\\com.toycloud.MeiYe.apk";
 	
 	/**
+	 * 设置每一块的大小为4M，如果网络条件比较好，可以设置8M、12M、16M等4M倍数，提高上传效率
+	 */
+	BaseBlockUtil.BLOCK_SIZE = 4 * 1024 * 1024;
+	
+	/**
 	 * 设置每一片大小为4M，减少上传请求。如果网络环境不好不建议设置改参数或者设置成较小的值，避免超时的情况。该参数默认值为256KB
 	 */
         BaseBlockUtil.CHUNK_SIZE = 4 * 1024 * 1024;
