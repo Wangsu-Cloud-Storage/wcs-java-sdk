@@ -49,6 +49,18 @@ java SDK基于网宿云存储API规范构建,支持1.6及以上版本（目前�
     String MGR_URL = "your mgrDomain";
     Config.init(ak,sk,PUT_URL,GET_URL,MGR_URL);
 
+#### 计算上传凭证
+1、JavaScript、Android、iOS等移动端由于安全原因，不适合将AK、SK等敏感信息配置到前端直接计算token，java-SDK可作为这些前端SDK的token服务器。
+**范例：**
+```
+bucketName = 'your bucket name';
+fileKey = 'your key name';
+PutPolicy putPolicy = new PutPolicy();		// 新建PutPolicy对象
+putPolicy.setOverwrite(1);    			// 配置覆盖上传
+putPolicy.setScope(bucketName + ":" + fileKey); // 配置scope指定上传的空间和文件名
+String uploadToken = TokenUtil.getUploadToken(putPolicy);
+```
+
 #### 文件上传
 1. returnUrl和callbackUrl不能同时指定。
 2. 若文件大小超过20M，建议使用分片上传
