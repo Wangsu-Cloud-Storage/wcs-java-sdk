@@ -282,7 +282,7 @@ public class SliceUploadDemo {
         String srcFilePath = "D:\\testfile\\test001\\com.toycloud.MeiYe.apk";
 	
 	/**
-	 * 设置每一块的大小为4M，如果网络条件比较好，可以设置8M、12M、16M等4M倍数，提高上传效率
+	 * 设置每一块的大小为4M，如果网络条件比较好，可以设置8M、12M、16M等4M倍数，提高上传效率。该参数默认值为4M
 	 */
 	BaseBlockUtil.BLOCK_SIZE = 4 * 1024 * 1024;
 	
@@ -292,9 +292,14 @@ public class SliceUploadDemo {
         BaseBlockUtil.CHUNK_SIZE = 4 * 1024 * 1024;
 	
 	/**
-	 * 设置块上传并发数，加快上传速度。如果网络环境不好不建议设置改参数或者设置成较小的值，避免超时的情况。该参数默认值为1
+	 * 设置块上传并发数，加快上传速度。如果网络环境不好不建议设置改参数或者设置成较小的值，避免超时的情况。该参数默认值为5
 	 */
 	BaseBlockUtil.THREAD_NUN = 5；
+	
+	/**
+	 * 设置请求超时、服务端响应异常的重试次数。该参数默认值为3
+	 */
+	BaseBlockUtil.TRIED_TIMES = 5；
         SliceUploadDemo demo = new SliceUploadDemo();
         demo.sliceUpload(bucketName,fileKey,srcFilePath);
 		demo.sliceUploadForAutoMimeType(bucketName, fileKey, srcFilePath);
