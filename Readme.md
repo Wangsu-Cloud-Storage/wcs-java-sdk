@@ -1,6 +1,6 @@
 ## wcs-java-sdk
 
-java SDK基于网宿云存储API规范构建,支持1.6及以上版本（目前支持java平台使用，不适合android平台）。
+wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（目前支持java平台使用，不适合android平台）。
 
  - [使用指南](#使用指南)
    - [准备开发环境](#准备开发环境)
