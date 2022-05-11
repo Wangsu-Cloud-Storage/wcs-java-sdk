@@ -21,12 +21,12 @@ wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（�
 
 ### 使用指南
 #### 准备开发环境
- - 在Maven项目中加入依赖项
+ - 在Maven项目中加入依赖项（[获取maven最新版本](https://mvnrepository.com/artifact/com.chinanetcenter.wcs.sdk/wcs-java-sdk)）
 
         <dependency>
             <groupId>com.chinanetcenter.wcs.sdk</groupId>
             <artifactId>wcs-java-sdk</artifactId>
-            <version>2.0.x</version>
+            <version>2.0.8</version>
         </dependency>
 
  - 使用GitHub下载
