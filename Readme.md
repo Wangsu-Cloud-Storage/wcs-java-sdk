@@ -762,5 +762,5 @@ public class DownloadDemo {
 计算本地文件的etag值，可用于和存储在云存储上文件的etag值做比对，校验文件是否完整
 ```
 File fileHash = new File(filePath);
-String eTagHash = WetagUtil.getEtagHash(fileHash.getParent(), fileHash.getName());// 根据文件内容计算hash
+String eTagHash = WetagUtil.getEtagHash(fileHash);// 根据文件内容计算hash
 ```
