@@ -15,6 +15,7 @@ wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（�
      - [复制资源](#复制资源)
      - [移动资源](#移动资源)
      - [更新镜像资源](#更新镜像资源)
+     - [按前缀删除资源](#按前缀删除资源)
    - [音视频操作](#音视频操作)
    - [抓取资源](#抓取资源)
    - [下载资源](#下载资源)
@@ -640,6 +641,18 @@ public class PreFetchDemo {
     }
 }
 ```
+##### 按前缀删除资源
+可以通过指定前缀，删除所有有共同前缀的资源，如指定prefix=html/，删除根路径下，html目录内的所有文件。 【注：该接口为异步删除方式】
+```
+List<FmgrParam> list = new ArrayList<FmgrParam>();
+FmgrParam fmgrParam = new FmgrParam();
+fmgrParam.setBucket(bucketName);
+fmgrParam.setPrefix("aac");
+String notifyURL = "http://demo1/notifyUrl";  //通知地址，非必填
+HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list);  // 删除结果不通知
+HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list, notifyURL); //删除接口通知到指定地址
+```
+
 #### 音视频操作
 提供音视频处理功能，包括：转码转封装、音视频拼接等操作。具体处理参数详见[音视频处理Ops参数格式](#document/API/Appendix/fopsParam#音视频处理)
 
