@@ -16,7 +16,13 @@ public class FmgrParam {
     private String resource;
     private String output;
     private String deletets;//指定是否进行关联删除ts文件。  0 不进行关联删除  1 删除关联的ts文件
-    private int deadline = -1;//文件保存期限。超过保存天数文件自动删除,单位：天。例如：1、2、3…… 注：0表示尽快删除，-1表示取消过期时间，永久保存
+    //已废弃,请使用deleteAfterDays，文件保存期限。超过保存天数文件自动删除,单位：天。例如：1、2、3…… 注：0表示尽快删除，-1表示取消过期时间，永久保存
+    @Deprecated
+    private int deadline = -1;
+    /**
+     * 文件保存期限。超过保存天数文件自动删除,单位：天。例如：1、2、3…… 注：0表示尽快删除，-1表示取消过期时间，永久保存
+     */
+    private int deleteAfterDays = -1;;
     /**
      * 用于存放后期扩展的参数，key value得根据文档中心的格式填
      */
@@ -87,11 +93,11 @@ public class FmgrParam {
     }
 
     public int getDeadline() {
-        return deadline;
+        return deleteAfterDays;
     }
 
     public void setDeadline(int deadline) {
-        this.deadline = deadline;
+        this.deleteAfterDays = deadline;
     }
 
     public Map<String, String> getParamMap() {
@@ -104,5 +110,14 @@ public class FmgrParam {
 
     public void putExtParams(String key, String value) {
         this.paramMap.put(key, value);
+    }
+
+
+    public int getDeleteAfterDays() {
+        return deleteAfterDays;
+    }
+
+    public void setDeleteAfterDays(int deleteAfterDays) {
+        this.deleteAfterDays = deleteAfterDays;
     }
 }

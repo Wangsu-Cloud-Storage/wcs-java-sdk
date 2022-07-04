@@ -3,6 +3,8 @@ package com.chinanetcenter.api.http;
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.entity.JsonValidator;
 import com.chinanetcenter.api.exception.WsClientException;
+import com.chinanetcenter.api.util.BandwidthLimiterFileBody;
+import com.chinanetcenter.api.util.BandwidthLimiterStreamBody;
 import com.chinanetcenter.api.util.Config;
 import com.chinanetcenter.api.util.EncodeUtils;
 import org.apache.commons.io.IOUtils;
@@ -24,7 +26,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -101,7 +102,7 @@ public class HttpClientUtil {
             };
             // 5秒超时
             RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(30000)
-                    .setSocketTimeout(30000).setConnectTimeout(30000).setRedirectsEnabled(false)
+                    .setSocketTimeout(Config.SOCKET_TIME_OUT).setConnectTimeout(Config.CONNECTION_TIME_OUT).setRedirectsEnabled(false)
                     .build();
             SocketConfig socketConfig = SocketConfig.custom().setSoTimeout(30000).build();
             if(StringUtils.startsWith(url, "https://")){
@@ -141,7 +142,7 @@ public class HttpClientUtil {
                 MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
                 mEntityBuilder.setCharset(Charset.forName("UTF-8"));
 
-                FileBody fileBody = new FileBody(file, ContentType.APPLICATION_OCTET_STREAM, file.getName());
+                BandwidthLimiterFileBody fileBody = new BandwidthLimiterFileBody(file, ContentType.APPLICATION_OCTET_STREAM, file.getName());
                 mEntityBuilder.addPart("file", fileBody);
                 mEntityBuilder.addTextBody("desc", file.getName());
 
@@ -169,12 +170,10 @@ public class HttpClientUtil {
                     httpPost.setHeader(entry.getKey(),entry.getValue());
                 }
             }
-            if (!httpPost.containsHeader("User-Agent"))
+            if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
-//            CloseableHttpClient hc = getHttpClient();
+            }
             CloseableHttpClient hc = createHttpClient(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
-            httpPost.setConfig(requestConfig);
             ht = hc.execute(httpPost);
 
             HttpEntity het = ht.getEntity();
@@ -217,12 +216,11 @@ public class HttpClientUtil {
                     httpGet.setHeader(entry.getKey(), entry.getValue());
                 }
             }
-            if (!httpGet.containsHeader("User-Agent"))
+            if (!httpGet.containsHeader("User-Agent")) {
                 httpGet.addHeader("User-Agent", Config.VERSION_NO);
-
-//            CloseableHttpClient hc = getHttpClient();
+            }
             CloseableHttpClient hc = createHttpClient(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
+            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(Config.SOCKET_TIME_OUT).setConnectTimeout(Config.CONNECTION_TIME_OUT).build();//设置请求和传输超时时间
             httpGet.setConfig(requestConfig);
             ht = hc.execute(httpGet);
 
@@ -263,7 +261,7 @@ public class HttpClientUtil {
             if (inputStream != null) {
                 MultipartEntityBuilder mEntityBuilder = MultipartEntityBuilder.create().setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
                 mEntityBuilder.setCharset(Charset.forName("UTF-8"));
-                InputStreamBody fileBody = new InputStreamBody(inputStream, fileName);
+                BandwidthLimiterStreamBody fileBody = new BandwidthLimiterStreamBody(inputStream, fileName);
                 mEntityBuilder.addPart("file", fileBody);
                 mEntityBuilder.addTextBody("desc", fileName);
 
@@ -292,12 +290,10 @@ public class HttpClientUtil {
                     httpPost.setHeader(entry.getKey(),entry.getValue());
                 }
             }
-            if (!httpPost.containsHeader("User-Agent"))
+            if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
-//            hc = getHttpClient();
+            }
             hc = createHttpClient(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
-            httpPost.setConfig(requestConfig);
             ht = hc.execute(httpPost);
 
             HttpEntity het = ht.getEntity();
@@ -367,9 +363,9 @@ public class HttpClientUtil {
                     httpPost.setHeader(entry.getKey(),entry.getValue());
                 }
             }
-            if (!httpPost.containsHeader("User-Agent"))
+            if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
-//            CloseableHttpClient hc = getHttpClient();
+            }
             CloseableHttpClient hc = createHttpClient(url);
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();//设置请求和传输超时时间
             httpPost.setConfig(requestConfig);
@@ -413,12 +409,10 @@ public class HttpClientUtil {
                     httpPost.setHeader(entry.getKey(), entry.getValue());
                 }
             }
-            if (!httpPost.containsHeader("User-Agent"))
+            if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
-//            CloseableHttpClient hc = getHttpClient();
+            }
             CloseableHttpClient hc = createHttpClient(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
-            httpPost.setConfig(requestConfig);
             ht = hc.execute(httpPost);
 
             HttpEntity het = ht.getEntity();
@@ -462,8 +456,6 @@ public class HttpClientUtil {
             }
 
             CloseableHttpClient hc = createHttpClient(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
-            httpGet.setConfig(requestConfig);
             ht = hc.execute(httpGet);
             int status = ht.getStatusLine().getStatusCode();
             HttpEntity het = ht.getEntity();
@@ -521,8 +513,6 @@ public class HttpClientUtil {
             }
 
             CloseableHttpClient hc = createHttpClient(url);
-            RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
-            httpGet.setConfig(requestConfig);
             ht = hc.execute(httpGet);
             int status = ht.getStatusLine().getStatusCode();
             HttpEntity het = ht.getEntity();

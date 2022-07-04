@@ -26,10 +26,14 @@ public class UploadDemo {
     public static void main(String[] args) throws FileNotFoundException {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
-        /**
-         * 可在用户管理界面-安全管理-域名查询获取uploadDomain,MgrDomain
+        /*
+          可在用户管理界面-安全管理-域名查询获取uploadDomain,MgrDomain
          */
         Config.PUT_URL = "your uploadDomain";
+        /*
+           客户端上传限速配置 单位kb/s
+         */
+        // Config.TRAFFIC_LIMIT = 1000;
         String bucketName = "your-bucket";
         String fileKey = "test.JPG";
         String fileKeyMp4 = "folder/test.JPG";

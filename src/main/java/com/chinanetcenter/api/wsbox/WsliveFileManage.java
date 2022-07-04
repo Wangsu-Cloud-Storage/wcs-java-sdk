@@ -30,11 +30,11 @@ public class WsliveFileManage {
      *设置文件的过期时间
      * 超过过期时间自动删除
      */
-    public static HttpClientResult setDeadline(String bucketName, String key, int deadline) throws WsClientException {
+    public static HttpClientResult setDeadline(String bucketName, String key, int deleteAfterDays) throws WsClientException {
         String body = "bucket=" + EncodeUtils.urlsafeEncode(bucketName);
-        body += "&key=" + EncodeUtils.urlsafeEncode(key) + "&deadline=" + deadline;
-        String url = Config.MGR_URL + "/wslive/setdeadline";
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/wslive/setdeadline" + "\n" + body).getBytes(), Config.SK));
+        body += "&key=" + EncodeUtils.urlsafeEncode(key) + "&deleteAfterDays=" + deleteAfterDays;
+        String url = Config.MGR_URL + "/setdeadline";
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/setdeadline" + "\n" + body).getBytes(), Config.SK));
         String Authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", Authorization);

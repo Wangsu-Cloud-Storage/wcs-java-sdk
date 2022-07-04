@@ -35,7 +35,6 @@ public class BaseBlockUtil {
     public static int MB = 1024 * KB;
     public static int BLOCK_SIZE = 4 * MB;
     public static int CHUNK_SIZE = 256 * KB;
-    public static int TRIED_TIMES = 3;
     public static int THREAD_NUN = 5;
     public static boolean isPersist = true;
     public static String properties_file_path = "";
@@ -91,7 +90,9 @@ public class BaseBlockUtil {
             return null;
         }
         File configFile = getPropertiesFile(bucketName, fileName);
-        if (!configFile.exists()) return null;
+        if (!configFile.exists()) {
+            return null;
+        }
         FileReader reader;
         int fileLen = (int) configFile.length();
         char[] chars = new char[fileLen];
@@ -112,7 +113,9 @@ public class BaseBlockUtil {
             return;
         }
         File configFile = getPropertiesFile(bucketName, fileName);
-        if (!configFile.exists()) return;
+        if (!configFile.exists()) {
+            return;
+        }
         configFile.delete();
     }
 
@@ -182,7 +185,7 @@ public class BaseBlockUtil {
             SliceUploadHttpResult ret = new SliceUploadHttpResult(ht.getStatusLine().getStatusCode(), sb.toString());
             // 401 上传数据块校验出错 ； 412 服务器块拼接文件出错，需要重新上传文件;  500服务端失败;  579 回调失败，不再重新makefile;
             if ((ret.status == 401 || ret.status == 412 || (ret.status / 100 == 5 && ret.status != 579))
-                    && time < BaseBlockUtil.TRIED_TIMES) {
+                    && time < Config.REQUEST_RETRY_TIMES) {
                 return mkFile(headMap, key, putExtra, time + 1);
             }
             return ret;
@@ -192,7 +195,7 @@ public class BaseBlockUtil {
                 logger.error("make file ClientProtocolException error," + message);
             }
             // 连接异常等重新makefile
-            if (time < BaseBlockUtil.TRIED_TIMES) {
+            if (time < Config.REQUEST_RETRY_TIMES) {
                 return mkFile(headMap, key, putExtra, time + 1);
             }
             throw new RuntimeException(e);

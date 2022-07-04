@@ -191,7 +191,7 @@ public class UploadDemo {
             Map<String, String> paramMap = new HashMap<String, String>();
             paramMap.put("token", uploadToken);
             paramMap.put("mimeType", "application/UQ");
-	    paramMap.put("deadline", 365);
+	    paramMap.put("deleteAfterDays", 365);
             HttpClientResult result = fileUploadManage.upload(paramMap,srcFilePath);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {

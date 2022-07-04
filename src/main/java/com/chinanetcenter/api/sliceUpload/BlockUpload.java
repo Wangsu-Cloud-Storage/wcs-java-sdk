@@ -3,6 +3,8 @@ package com.chinanetcenter.api.sliceUpload;
 import com.chinanetcenter.api.entity.SliceUploadHttpResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.http.HttpClientUtil;
+import com.chinanetcenter.api.util.BandwidthLimiterByteArrayHttpEntity;
+import com.chinanetcenter.api.util.BandwidthLimiterRandomAccessFileHttpEntity;
 import com.chinanetcenter.api.util.Config;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpException;
@@ -110,12 +112,11 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
             }
 
             if (blockObject.getData() != null) {
-                long start = blockObject.getStart();
-                HttpEntity httpEntity = buildHttpEntity(blockObject.getBlockBuffer(), start, len);
+                HttpEntity httpEntity = new BandwidthLimiterByteArrayHttpEntity(false, len, blockObject.getBlockBuffer());
                 post.setEntity(httpEntity);
             } else {
                 long start = blockObject.getOffset() + blockObject.getStart();
-                post.setEntity(buildHttpEntity(blockObject.file, start, len));
+                post.setEntity(new BandwidthLimiterRandomAccessFileHttpEntity(false, len, start, blockObject.file));
             }
             response = httpClient.execute(post);
 
@@ -143,7 +144,7 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
 
     private SliceUploadHttpResult checkAndRetryUpload(String url, int len, int time, SliceUploadHttpResult result) throws Exception {
         if (!result.isOk()) {
-            if ((result.getStatus() == 406 || result.getStatus() == 701 || result.getStatus() / 100 == 5) && time < TRIED_TIMES) {
+            if ((result.getStatus() == 406 || result.getStatus() == 701 || result.getStatus() / 100 == 5) && time < Config.REQUEST_RETRY_TIMES) {
                 return upload(url, len, time + 1);
             } else {
                 throw new WsClientException(result.getStatus(), url + "connect result error, stauts :" + result.getStatus() + " reason:" + (result.response == null ? "" : result.response));
@@ -155,7 +156,7 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
                 String checkSum = getMD5String(blockObject.getData(), (int) blockObject.getStart(), len);
                 // 上传的数据 CRC32 或md5校验不一致。
                 if (result.getCrc32() != crc32 || !result.getChecksum().equals(checkSum)) {
-                    if (time < TRIED_TIMES) {
+                    if (time < Config.REQUEST_RETRY_TIMES) {
                         return upload(url, len, time + 1);
                     } else {
                         System.out.println("result.getCrc32():" + result.getCrc32() + ",crc32:" + crc32);
@@ -172,7 +173,7 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
                 String checkSum = getFileMD5String(len);
                 // 上传的数据 CRC32 或md5校验不一致。
                 if (result.getCrc32() != crc32 || !result.getChecksum().equals(checkSum)) {
-                    if (time < TRIED_TIMES) {
+                    if (time < Config.REQUEST_RETRY_TIMES) {
                         return upload(url, len, time + 1);
                     } else {
                         System.out.println("result.getCrc32():" + result.getCrc32() + ",crc32:" + crc32);

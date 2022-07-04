@@ -20,10 +20,9 @@ public class SetdeadlineDemo {
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
         String fileKey = "java-sdk/testfile.jpg";
-        int deadline = 30;//代表30天后过期
-        WsliveFileManage manageCommand = new WsliveFileManage();
+        int deleteAfterDays = 30;//代表30天后过期
         try {
-            HttpClientResult result = manageCommand.setDeadline(bucketName, fileKey, deadline);
+            HttpClientResult result = WsliveFileManage.setDeadline(bucketName, fileKey, deleteAfterDays);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();

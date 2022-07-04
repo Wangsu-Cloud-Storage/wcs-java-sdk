@@ -28,12 +28,12 @@ public class FmgrSetdeadlineDemo {
             FmgrParam fmgrParam = new FmgrParam();
             fmgrParam.setBucket(bucketName);
             fmgrParam.setPrefix("aaa");
-            fmgrParam.setDeadline(10);
+            fmgrParam.setDeleteAfterDays(10);
             list.add(fmgrParam);
             FmgrParam fmgrParam2 = new FmgrParam();
             fmgrParam2.setBucket(bucketName);
             fmgrParam2.setPrefix("bbb");
-            fmgrParam2.setDeadline(5);
+            fmgrParam2.setDeleteAfterDays(5);
             list.add(fmgrParam2);
             String notifyURL = "http://demo1/notifyUrl";  //通知地址，转码成功后会回调此地址
             HttpClientResult result = fileManageCommand.fmgrSetdeadline(list, notifyURL);

@@ -297,7 +297,7 @@ public class FmgrFileManage {
         for (FmgrParam fmgrParam : fmgrList) {
             fopsSB.append("bucket/").append(EncodeUtils.urlsafeEncode(fmgrParam.getBucket()));
             fopsSB.append("/prefix/").append(EncodeUtils.urlsafeEncode(fmgrParam.getPrefix()));
-            fopsSB.append("/deadline/").append(fmgrParam.getDeadline());
+            fopsSB.append("/deleteAfterDays/").append(fmgrParam.getDeleteAfterDays());
             if (fmgrParam.getParamMap() != null && fmgrParam.getParamMap().size() > 0) {
                 for (Map.Entry<String, String> entry : fmgrParam.getParamMap().entrySet()) {
                     fopsSB.append("/").append(entry.getKey()).append("/").append(entry.getValue());

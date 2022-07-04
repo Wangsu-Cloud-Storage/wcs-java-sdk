@@ -11,7 +11,7 @@ import java.net.UnknownHostException;
  * @since 2014/03/02
  */
 public class Config {
-    public final static String VERSION_NO = "wcs-java-sdk-2.0.7";
+    public final static String VERSION_NO = "wcs-java-sdk-2.0.9";
     /**
      * 具体AK SK信息请从网宿云存储Web应用中(账号管理-密钥管理)处获取
      */
@@ -28,6 +28,23 @@ public class Config {
     public static String GET_URL = "your downloadDomain";
     public static String LOCAL_IP = "127.0.0.1";
     public static String LOG_FILE_PATH = "";
+
+    /**
+     * 请求链接超时时间，单位毫秒
+     */
+    public static int CONNECTION_TIME_OUT = 30000;
+    /**
+     * 数据传输超时时间，单位毫秒
+     */
+    public static int SOCKET_TIME_OUT = 60000;
+    /**
+     * 请求超时次数
+     */
+    public static int REQUEST_RETRY_TIMES = 3;
+    /**
+     * 限速 单位kb/s 为0时表示不限速
+     */
+    public static int TRAFFIC_LIMIT = 0;
 
     /**
      * 禁止外部直接生成实例<br>
@@ -105,5 +122,71 @@ public class Config {
         GET_URL = getUrl;
         MGR_URL = mgrUrl;
         LOG_FILE_PATH = logFilePath;
+    }
+
+    /**
+     *
+     * @param ak          空间的AK信息
+     * @param sk          空间的SK信息
+     * @param logFilePath http请求日志的路径
+     * @param connectionTimeOut 请求超时时间
+     * @param socketTimeOut 数据传输超时时间
+     */
+    public static void init(String ak, String sk, String putUrl, String getUrl, String mgrUrl, String logFilePath,
+                            int connectionTimeOut, int socketTimeOut) {
+        AK = ak;
+        SK = sk;
+        PUT_URL = putUrl;
+        GET_URL = getUrl;
+        MGR_URL = mgrUrl;
+        LOG_FILE_PATH = logFilePath;
+        CONNECTION_TIME_OUT = connectionTimeOut;
+        SOCKET_TIME_OUT = socketTimeOut;
+    }
+
+    /**
+     *
+     * @param ak          空间的AK信息
+     * @param sk          空间的SK信息
+     * @param logFilePath http请求日志的路径
+     * @param connectionTimeOut 请求超时时间
+     * @param socketTimeOut 数据传输超时时间
+     * @param requestRetryTimes 重试次数
+     */
+    public static void init(String ak, String sk, String putUrl, String getUrl, String mgrUrl, String logFilePath,
+                            int connectionTimeOut, int socketTimeOut, int requestRetryTimes) {
+        AK = ak;
+        SK = sk;
+        PUT_URL = putUrl;
+        GET_URL = getUrl;
+        MGR_URL = mgrUrl;
+        LOG_FILE_PATH = logFilePath;
+        CONNECTION_TIME_OUT = connectionTimeOut;
+        SOCKET_TIME_OUT = socketTimeOut;
+        REQUEST_RETRY_TIMES = requestRetryTimes;
+    }
+
+    /**
+     *
+     * @param ak          空间的AK信息
+     * @param sk          空间的SK信息
+     * @param logFilePath http请求日志的路径
+     * @param connectionTimeOut 请求超时时间
+     * @param socketTimeOut 数据传输超时时间
+     * @param requestRetryTimes 重试次数
+     * @param trafficLimit 限速
+     */
+    public static void init(String ak, String sk, String putUrl, String getUrl, String mgrUrl, String logFilePath,
+                            int connectionTimeOut, int socketTimeOut, int requestRetryTimes, int trafficLimit) {
+        AK = ak;
+        SK = sk;
+        PUT_URL = putUrl;
+        GET_URL = getUrl;
+        MGR_URL = mgrUrl;
+        LOG_FILE_PATH = logFilePath;
+        CONNECTION_TIME_OUT = connectionTimeOut;
+        SOCKET_TIME_OUT = socketTimeOut;
+        REQUEST_RETRY_TIMES = requestRetryTimes;
+        TRAFFIC_LIMIT = trafficLimit;
     }
 }
