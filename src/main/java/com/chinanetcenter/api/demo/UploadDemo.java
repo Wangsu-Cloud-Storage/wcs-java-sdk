@@ -33,7 +33,7 @@ public class UploadDemo {
         /*
            客户端上传限速配置 单位kb/s
          */
-        // Config.TRAFFIC_LIMIT = 1000;
+        Config.TRAFFIC_LIMIT = 0;
         String bucketName = "your-bucket";
         String fileKey = "test.JPG";
         String fileKeyMp4 = "folder/test.JPG";

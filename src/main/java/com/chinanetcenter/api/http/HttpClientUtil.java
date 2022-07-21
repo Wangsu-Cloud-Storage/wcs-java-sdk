@@ -18,9 +18,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.config.SocketConfig;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLContextBuilder;
-import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -34,10 +33,14 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.CharsetUtils;
 
 import javax.net.ssl.SSLContext;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -105,17 +108,11 @@ public class HttpClientUtil {
                     .setSocketTimeout(Config.SOCKET_TIME_OUT).setConnectTimeout(Config.CONNECTION_TIME_OUT).setRedirectsEnabled(false)
                     .build();
             SocketConfig socketConfig = SocketConfig.custom().setSoTimeout(30000).build();
-            if(StringUtils.startsWith(url, "https://")){
-                SSLContext sslContext = new SSLContextBuilder().loadTrustMaterial(null, new TrustStrategy() {
-                    //信任所有
-                    public boolean isTrusted(X509Certificate[] chain,
-                                             String authType) throws CertificateException {
-                        return true;
-                    }
-                }).build();
-                SSLConnectionSocketFactory sslSf = new SSLConnectionSocketFactory(sslContext,SSLConnectionSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+            if (StringUtils.startsWith(url, "https://")) {
+                // httpClient 升级，使用默认的SSL上下文，及关闭主机名验证
+                SSLConnectionSocketFactory sslSf = new SSLConnectionSocketFactory(SSLContext.getDefault(), NoopHostnameVerifier.INSTANCE);
                 return HttpClients.custom().setDefaultSocketConfig(socketConfig).setDefaultRequestConfig(requestConfig).setRetryHandler(myRetryHandler).setSSLSocketFactory(sslSf).build();
-            }else {
+            } else {
                 PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
                 cm.setMaxTotal(50);// 连接池最大并发连接数
                 cm.setDefaultMaxPerRoute(30);// 单路由最大并发数
@@ -147,13 +144,13 @@ public class HttpClientUtil {
                 mEntityBuilder.addTextBody("desc", file.getName());
 
                 if (params != null && params.size() > 0) {
-                    for(Map.Entry<String, String> entry:params.entrySet()){
+                    for (Map.Entry<String, String> entry : params.entrySet()) {
                         mEntityBuilder.addTextBody(entry.getKey(), entry.getValue(), ContentType.create("text/plain", Charset.forName("UTF-8")));
                     }
                 }
                 httpPost.setEntity(mEntityBuilder.build());
             } else if (params != null && params.size() > 0) {
-                for(Map.Entry<String, String> entry:params.entrySet()){
+                for (Map.Entry<String, String> entry : params.entrySet()) {
                     paramsList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
                 }
                 HttpEntity he = null;
@@ -166,8 +163,8 @@ public class HttpClientUtil {
             }
 
             if (headMap != null && headMap.size() > 0) {
-                for(Map.Entry<String, String> entry:headMap.entrySet()){
-                    httpPost.setHeader(entry.getKey(),entry.getValue());
+                for (Map.Entry<String, String> entry : headMap.entrySet()) {
+                    httpPost.setHeader(entry.getKey(), entry.getValue());
                 }
             }
             if (!httpPost.containsHeader("User-Agent")) {
@@ -212,7 +209,7 @@ public class HttpClientUtil {
             httpGet = new HttpGet(url);
 
             if (headMap != null && headMap.size() > 0) {
-                for(Map.Entry<String, String> entry:headMap.entrySet()){
+                for (Map.Entry<String, String> entry : headMap.entrySet()) {
                     httpGet.setHeader(entry.getKey(), entry.getValue());
                 }
             }
@@ -266,14 +263,14 @@ public class HttpClientUtil {
                 mEntityBuilder.addTextBody("desc", fileName);
 
                 if (params != null && params.size() > 0) {
-                    for(Map.Entry<String, String> entry:params.entrySet()){
+                    for (Map.Entry<String, String> entry : params.entrySet()) {
                         mEntityBuilder.addTextBody(entry.getKey(), entry.getValue(), ContentType.create("text/plain", Charset.forName("UTF-8")));
                     }
                 }
 
                 httpPost.setEntity(mEntityBuilder.build());
             } else if (params != null && params.size() > 0) {
-                for(Map.Entry<String, String> entry:params.entrySet()){
+                for (Map.Entry<String, String> entry : params.entrySet()) {
                     paramsList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
                 }
                 HttpEntity he = null;
@@ -286,8 +283,8 @@ public class HttpClientUtil {
             }
 
             if (headMap != null && headMap.size() > 0) {
-                for(Map.Entry<String, String> entry:headMap.entrySet()){
-                    httpPost.setHeader(entry.getKey(),entry.getValue());
+                for (Map.Entry<String, String> entry : headMap.entrySet()) {
+                    httpPost.setHeader(entry.getKey(), entry.getValue());
                 }
             }
             if (!httpPost.containsHeader("User-Agent")) {
@@ -345,13 +342,13 @@ public class HttpClientUtil {
                     mEntityBuilder.addPart("file", fileBody);
                 }
                 if (params != null && params.size() > 0) {
-                    for(Map.Entry<String, String> entry:params.entrySet()){
+                    for (Map.Entry<String, String> entry : params.entrySet()) {
                         mEntityBuilder.addTextBody(entry.getKey(), entry.getValue(), ContentType.create("text/plain", Charset.forName("UTF-8")));
                     }
                 }
                 httpPost.setEntity(mEntityBuilder.setCharset(CharsetUtils.get("UTF-8")).build());
             } else if (params != null && params.size() > 0) {
-                for(Map.Entry<String, String> entry:params.entrySet()){
+                for (Map.Entry<String, String> entry : params.entrySet()) {
                     paramsList.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
                 }
                 HttpEntity he = new UrlEncodedFormEntity(paramsList, "utf-8");
@@ -359,8 +356,8 @@ public class HttpClientUtil {
             }
 
             if (headMap != null && headMap.size() > 0) {
-                for(Map.Entry<String, String> entry:headMap.entrySet()){
-                    httpPost.setHeader(entry.getKey(),entry.getValue());
+                for (Map.Entry<String, String> entry : headMap.entrySet()) {
+                    httpPost.setHeader(entry.getKey(), entry.getValue());
                 }
             }
             if (!httpPost.containsHeader("User-Agent")) {
@@ -405,7 +402,7 @@ public class HttpClientUtil {
             httpPost.setEntity(s);
 
             if (headMap != null && headMap.size() > 0) {
-                for(Map.Entry<String, String> entry:headMap.entrySet()){
+                for (Map.Entry<String, String> entry : headMap.entrySet()) {
                     httpPost.setHeader(entry.getKey(), entry.getValue());
                 }
             }
