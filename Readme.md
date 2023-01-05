@@ -61,6 +61,7 @@ fileKey = 'your key name';
 PutPolicy putPolicy = new PutPolicy();		// 新建PutPolicy对象
 putPolicy.setOverwrite(1);    			// 配置覆盖上传
 putPolicy.setScope(bucketName + ":" + fileKey); // 配置scope指定上传的空间和文件名
+putPolicy.setDeadline("timestamp");		// 配置token的过期时间，格式为毫秒级的过期时间戳
 String uploadToken = TokenUtil.getUploadToken(putPolicy);
 ```
 
