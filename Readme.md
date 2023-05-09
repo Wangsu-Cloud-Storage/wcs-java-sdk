@@ -655,7 +655,7 @@ HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list, notifyURL); /
 ```
 
 #### 音视频操作
-提供音视频处理功能，包括：转码转封装、音视频拼接等操作。具体处理参数详见[音视频处理Ops参数格式](#document/API/Appendix/fopsParam#音视频处理)
+提供音视频处理功能，包括：转码转封装、音视频拼接、解压缩等操作。具体处理参数详见[音视频处理Ops参数格式](#document/API/Appendix/fopsParam#音视频处理)
 
 **范例：**
 ```
