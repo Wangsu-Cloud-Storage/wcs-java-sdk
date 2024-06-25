@@ -10,8 +10,7 @@
         <RollingFile name="RollingFileInfo" fileName="${sys:user.dir}/logs/WOS-SDK.interface_south.log"
                      filePattern="${sys:user.dir}/logs/WOS-SDK.interface_south-%i.log" filePermissions="rw-------">
             <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
-            <PatternLayout charset="UTF-8" pattern="%d{yyyy-MM-dd HH:mm:ss SSS}|%t|%-5p|%m%n" />
-            <PatternLayout pattern="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
+            <PatternLayout charset="UTF-8" pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
             <SizeBasedTriggeringPolicy size="20M" />
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
@@ -19,9 +18,14 @@
     </Appenders>
 
     <Loggers>
-        <!-- console log -->
-        <Root level="DEBUG">
+        <Logger name="com.chinanetcenter.api.demo" level="DEBUG" additivity="false">
             <AppenderRef ref="Console" />
+        </Logger>
+
+        <!-- console log -->
+        <Root level="INFO">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="RollingFileInfo" />
         </Root>
     </Loggers>
 </Configuration>
