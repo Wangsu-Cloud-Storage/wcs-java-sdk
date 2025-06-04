@@ -49,7 +49,9 @@ wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（�
     String PUT_URL = "your uploadDomain";
     String GET_URL = "your downloadDomain";
     String MGR_URL = "your mgrDomain";
-    Config.init(ak,sk,PUT_URL,GET_URL,MGR_URL);
+    int connection_timeout = 30000;
+    int socket_timeout = 60000;
+    Config.init(ak,sk,PUT_URL,GET_URL,MGR_URL,'logfilePath',connection_timeout,socket_timeout);
 
 #### 计算上传凭证
 1、JavaScript、Android、iOS等移动端由于安全原因，不适合将AK、SK等敏感信息配置到前端直接计算token，java-SDK可作为这些前端SDK的token服务器。
