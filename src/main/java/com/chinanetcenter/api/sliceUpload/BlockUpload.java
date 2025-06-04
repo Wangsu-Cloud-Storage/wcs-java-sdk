@@ -110,6 +110,9 @@ public class BlockUpload extends BaseBlockUtil implements Callable {
             if(!post.containsHeader("User-Agent")){
                 post.addHeader("User-Agent", Config.VERSION_NO);
             }
+            if (!post.containsHeader("encryption-type")) {
+                post.addHeader("encryption-type", Config.ENCRYPTION_TYPE.getHeaderValue());
+            }
 
             if (blockObject.getData() != null) {
                 HttpEntity httpEntity = new BandwidthLimiterByteArrayHttpEntity(false, len, blockObject.getBlockBuffer());

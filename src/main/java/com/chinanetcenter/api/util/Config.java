@@ -1,5 +1,7 @@
 package com.chinanetcenter.api.util;
 
+import com.chinanetcenter.api.emum.EncryptionType;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -45,6 +47,12 @@ public class Config {
      * 限速 单位kb/s 为0时表示不限速
      */
     public static int TRAFFIC_LIMIT = 0;
+
+    /**
+     * 加密算法类型，默认使用SHA1算法
+     * 支持的值：SHA1、SM3
+     */
+    public static EncryptionType ENCRYPTION_TYPE = EncryptionType.SHA1;
 
     /**
      * 禁止外部直接生成实例<br>

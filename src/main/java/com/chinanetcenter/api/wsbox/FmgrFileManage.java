@@ -66,7 +66,7 @@ public class FmgrFileManage {
         if (StringUtils.isNotEmpty(separate)){
             bodySB.append("&separate=").append(separate);
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fmgr/fetch" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fmgr/fetch" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);
@@ -112,7 +112,7 @@ public class FmgrFileManage {
         if (StringUtils.isNotEmpty(separate)){
             bodySB.append("&separate=").append(separate);
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fmgr/copy" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fmgr/copy" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);
@@ -158,7 +158,7 @@ public class FmgrFileManage {
         if (StringUtils.isNotEmpty(separate)){
             bodySB.append("&separate=").append(separate);
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fmgr/move" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fmgr/move" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);
@@ -200,7 +200,7 @@ public class FmgrFileManage {
         if (StringUtils.isNotEmpty(separate)){
             bodySB.append("&separate=").append(separate);
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fmgr/delete" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fmgr/delete" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);
@@ -243,7 +243,7 @@ public class FmgrFileManage {
         if (StringUtils.isNotEmpty(separate)){
             bodySB.append("&separate=").append(separate);
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fmgr/deletePrefix" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fmgr/deletePrefix" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);
@@ -279,7 +279,7 @@ public class FmgrFileManage {
         if (StringUtils.isNotEmpty(separate)) {
             bodySB.append("&separate=").append(separate);
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fmgr/deletem3u8" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fmgr/deletem3u8" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);
@@ -310,7 +310,7 @@ public class FmgrFileManage {
         if (StringUtils.isNotEmpty(notifyUrl)) {
             bodySB.append("&notifyURL=").append(EncodeUtils.urlsafeEncode(notifyUrl));
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fmgr/setdeadline" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fmgr/setdeadline" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);

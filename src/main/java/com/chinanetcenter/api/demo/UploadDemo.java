@@ -1,5 +1,6 @@
 package com.chinanetcenter.api.demo;
 
+import com.chinanetcenter.api.emum.EncryptionType;
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.entity.PutPolicy;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -34,6 +35,10 @@ public class UploadDemo {
            客户端上传限速配置 单位kb/s
          */
         Config.TRAFFIC_LIMIT = 0;
+        /*
+         使用的加密算法类型，默认使用SHA1算法（可不配置）
+         */
+        Config.ENCRYPTION_TYPE = EncryptionType.SHA1;
         String bucketName = "your-bucket";
         String fileKey = "test.JPG";
         String fileKeyMp4 = "folder/test.JPG";

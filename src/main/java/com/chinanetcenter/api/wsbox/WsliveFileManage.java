@@ -34,7 +34,7 @@ public class WsliveFileManage {
         String body = "bucket=" + EncodeUtils.urlsafeEncode(bucketName);
         body += "&key=" + EncodeUtils.urlsafeEncode(key) + "&deleteAfterDays=" + deleteAfterDays;
         String url = Config.MGR_URL + "/setdeadline";
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/setdeadline" + "\n" + body).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/setdeadline" + "\n" + body).getBytes(), Config.SK));
         String Authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", Authorization);

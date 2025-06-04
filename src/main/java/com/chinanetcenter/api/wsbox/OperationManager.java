@@ -132,7 +132,7 @@ public class OperationManager {
         String param = sb.toString();
         String encodeEntryUrl = EncodeUtils.urlsafeEncode(param);
         String url = Config.MGR_URL + "/prefetch/" + encodeEntryUrl;
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/prefetch/" + encodeEntryUrl + "\n").getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/prefetch/" + encodeEntryUrl + "\n").getBytes(), Config.SK));
         String Authorization = Config.AK + ":" + value;
 
         Map<String, String> headMap = new HashMap<String, String>();
@@ -177,14 +177,13 @@ public class OperationManager {
         String encodeEntryURISrc = EncodeUtils.urlsafeEncode(entrySrc);
         String encodeEntryURIDest = EncodeUtils.urlsafeEncode(entryDest);
         String url = Config.MGR_URL + "/copy/" + encodeEntryURISrc + "/" + encodeEntryURIDest;
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/copy/" + encodeEntryURISrc + "/" + encodeEntryURIDest + "\n").getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/copy/" + encodeEntryURISrc + "/" + encodeEntryURIDest + "\n").getBytes(), Config.SK));
         String Authorization = Config.AK + ":" + value;
 
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", Authorization);
 
         return HttpClientUtil.httpPost(url, null, headMap);
-
     }
 
     /**
@@ -209,7 +208,7 @@ public class OperationManager {
         String encodeEntryURISrc = EncodeUtils.urlsafeEncode(entrySrc);
         String encodeEntryURIDest = EncodeUtils.urlsafeEncode(entryDest);
         String url = Config.MGR_URL + "/move/" + encodeEntryURISrc + "/" + encodeEntryURIDest;
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/move/" + encodeEntryURISrc + "/" + encodeEntryURIDest + "\n").getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/move/" + encodeEntryURISrc + "/" + encodeEntryURIDest + "\n").getBytes(), Config.SK));
         String Authorization = Config.AK + ":" + value;
 
         Map<String, String> headMap = new HashMap<String, String>();
@@ -237,7 +236,7 @@ public class OperationManager {
         if (StringUtils.isNotEmpty(separate)){
             bodySB.append("&separate=").append(separate);
         }
-        String value = EncodeUtils.urlsafeEncode(EncryptUtil.sha1Hex(("/fops" + "\n" + bodySB.toString()).getBytes(), Config.SK));
+        String value = EncodeUtils.urlsafeEncode(EncryptUtil.encrypt(("/fops" + "\n" + bodySB.toString()).getBytes(), Config.SK));
         String authorization = Config.AK + ":" + value;
         Map<String, String> headMap = new HashMap<String, String>();
         headMap.put("Authorization", authorization);

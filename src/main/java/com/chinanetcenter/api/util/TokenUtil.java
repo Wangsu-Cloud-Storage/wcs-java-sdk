@@ -27,7 +27,7 @@ public class TokenUtil {
         JsonMapper jsonMapper = JsonMapper.nonEmptyMapper();
         String putPolicyStr = jsonMapper.toJson(putPolicy);
         String encodePutPolicy = EncodeUtils.urlsafeEncode(putPolicyStr);
-        String singSk = EncryptUtil.sha1Hex(encodePutPolicy.getBytes(), Config.SK);//签名
+        String singSk = EncryptUtil.encrypt(encodePutPolicy.getBytes(), Config.SK);//签名
         String skValue = EncodeUtils.urlsafeEncode(singSk);//Base64编码
         String uploadToken = Config.AK + ":" + skValue + ":" + encodePutPolicy;
         return uploadToken;
@@ -44,7 +44,7 @@ public class TokenUtil {
     public static String getDeleteToken(String bucketName, String fileName) {
         String encodedEntryURI = EncodeUtils.urlsafeEncodeString((bucketName + ":" + fileName).getBytes());
         String encodeDeletePath = "/delete/" + encodedEntryURI + "\n";
-        String signSk = EncryptUtil.sha1Hex(encodeDeletePath.getBytes(), Config.SK);//签名
+        String signSk = EncryptUtil.encrypt(encodeDeletePath.getBytes(), Config.SK);//签名
         String encodedSign = EncodeUtils.urlsafeEncode(signSk);//Base64编码
         String deleteToken = Config.AK + ":" + encodedSign;
         return deleteToken;
@@ -60,7 +60,7 @@ public class TokenUtil {
     public static String getDeletePrefixToken(String bucketName, String fileName) {
         String encodedEntryURI = EncodeUtils.urlsafeEncodeString((bucketName + ":" + fileName).getBytes());
         String encodeDeletePath = "/deletePrefix/" + encodedEntryURI + "\n";
-        String signSk = EncryptUtil.sha1Hex(encodeDeletePath.getBytes(), Config.SK);//签名
+        String signSk = EncryptUtil.encrypt(encodeDeletePath.getBytes(), Config.SK);//签名
         String encodedSign = EncodeUtils.urlsafeEncode(signSk);//Base64编码
         String deleteToken = Config.AK + ":" + encodedSign;
         return deleteToken;
@@ -76,7 +76,7 @@ public class TokenUtil {
     public static String getStatToken(String bucketName, String fileName) {
         String encodedEntryURI = EncodeUtils.urlsafeEncodeString((bucketName + ":" + fileName).getBytes());
         String encodeDeletePath = "/stat/" + encodedEntryURI + "\n";
-        String signSk = EncryptUtil.sha1Hex(encodeDeletePath.getBytes(), Config.SK);//签名
+        String signSk = EncryptUtil.encrypt(encodeDeletePath.getBytes(), Config.SK);//签名
         String encodedSign = EncodeUtils.urlsafeEncode(signSk);//Base64编码
         String deleteToken = Config.AK + ":" + encodedSign;
         return deleteToken;
@@ -84,7 +84,7 @@ public class TokenUtil {
 
     public static String getFileListToken(String listUrl) {
         listUrl += "\n";
-        String encodeDownloadUrl = EncryptUtil.sha1Hex(listUrl.getBytes(), Config.SK);//签名
+        String encodeDownloadUrl = EncryptUtil.encrypt(listUrl.getBytes(), Config.SK);//签名
         String skValues = EncodeUtils.urlsafeEncode(encodeDownloadUrl);//Base64编码
         String listToken = Config.AK + ":" + skValues;
         return listToken;

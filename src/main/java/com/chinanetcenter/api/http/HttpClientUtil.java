@@ -10,6 +10,7 @@ import com.chinanetcenter.api.util.EncodeUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpMessage;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpRequestRetryHandler;
 import org.apache.http.client.config.RequestConfig;
@@ -125,6 +126,16 @@ public class HttpClientUtil {
         return httpClient;
     }
 
+    /**
+     * 添加加密类型的HTTP请求头
+     * @param httpMessage HTTP请求
+     */
+    private static void addEncryptionTypeHeader(HttpMessage httpMessage) {
+        if (!httpMessage.containsHeader("encryption-type")) {
+            httpMessage.addHeader("encryption-type", Config.ENCRYPTION_TYPE.getHeaderValue());
+        }
+    }
+
     public static HttpClientResult httpPost(String url, Map<String, String> params, Map<String, String> headMap, File file) throws WsClientException {
         String response = "";
         HttpPost httpPost = null;
@@ -170,6 +181,9 @@ public class HttpClientUtil {
             if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
             }
+            // 添加加密类型头部
+            addEncryptionTypeHeader(httpPost);
+            
             CloseableHttpClient hc = createHttpClient(url);
             ht = hc.execute(httpPost);
 
@@ -216,6 +230,9 @@ public class HttpClientUtil {
             if (!httpGet.containsHeader("User-Agent")) {
                 httpGet.addHeader("User-Agent", Config.VERSION_NO);
             }
+            // 添加加密类型头部
+            addEncryptionTypeHeader(httpGet);
+            
             CloseableHttpClient hc = createHttpClient(url);
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(Config.SOCKET_TIME_OUT).setConnectTimeout(Config.CONNECTION_TIME_OUT).build();//设置请求和传输超时时间
             httpGet.setConfig(requestConfig);
@@ -290,6 +307,9 @@ public class HttpClientUtil {
             if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
             }
+            // 添加加密类型头部
+            addEncryptionTypeHeader(httpPost);
+            
             hc = createHttpClient(url);
             ht = hc.execute(httpPost);
 
@@ -363,6 +383,9 @@ public class HttpClientUtil {
             if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
             }
+            // 添加加密类型头部
+            addEncryptionTypeHeader(httpPost);
+            
             CloseableHttpClient hc = createHttpClient(url);
             RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(120000).setConnectTimeout(120000).build();//设置请求和传输超时时间
             httpPost.setConfig(requestConfig);
@@ -409,6 +432,9 @@ public class HttpClientUtil {
             if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
             }
+            // 添加加密类型头部
+            addEncryptionTypeHeader(httpPost);
+            
             CloseableHttpClient hc = createHttpClient(url);
             ht = hc.execute(httpPost);
 
@@ -451,6 +477,8 @@ public class HttpClientUtil {
             if (!httpGet.containsHeader("User-Agent")) {
                 httpGet.addHeader("User-Agent", Config.VERSION_NO);
             }
+            // 添加加密类型头部
+            addEncryptionTypeHeader(httpGet);
 
             CloseableHttpClient hc = createHttpClient(url);
             ht = hc.execute(httpGet);
@@ -508,6 +536,8 @@ public class HttpClientUtil {
             if (!httpGet.containsHeader("User-Agent")) {
                 httpGet.addHeader("User-Agent", Config.VERSION_NO);
             }
+            // 添加加密类型头部
+            addEncryptionTypeHeader(httpGet);
 
             CloseableHttpClient hc = createHttpClient(url);
             ht = hc.execute(httpGet);

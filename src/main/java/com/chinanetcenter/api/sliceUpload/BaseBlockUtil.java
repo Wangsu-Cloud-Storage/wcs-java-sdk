@@ -162,6 +162,9 @@ public class BaseBlockUtil {
             if (!httpPost.containsHeader("User-Agent")) {
                 httpPost.addHeader("User-Agent", Config.VERSION_NO);
             }
+            if (!httpPost.containsHeader("encryption-type")) {
+                httpPost.addHeader("encryption-type", Config.ENCRYPTION_TYPE.getHeaderValue());
+            }
             if (headMap != null && headMap.size() > 0) {
                 for (Map.Entry<String, String> entry : headMap.entrySet()) {
                     httpPost.setHeader(entry.getKey(), entry.getValue());

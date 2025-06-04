@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.chinanetcenter.wcs.sdk</groupId>
     <artifactId>wcs-java-sdk</artifactId>
-    <version>2.0.10</version>
+    <version>2.0.11</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -151,6 +151,14 @@
             <artifactId>commons-io</artifactId>
             <version>2.7</version>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.80</version>
+        </dependency>
+
         <!--<dependency>-->
             <!--<groupId>net.sf.json-lib</groupId>-->
             <!--<artifactId>json-lib</artifactId>-->
