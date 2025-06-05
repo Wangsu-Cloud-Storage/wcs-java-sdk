@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/93a44ff4-b55a-485d-8632-b30b898d1b01)## wcs-java-sdk
+## wcs-java-sdk
 
 wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（目前支持java平台使用，不适合android平台）。
 
