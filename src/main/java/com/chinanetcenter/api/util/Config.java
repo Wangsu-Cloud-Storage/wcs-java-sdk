@@ -13,7 +13,7 @@ import java.net.UnknownHostException;
  * @since 2014/03/02
  */
 public class Config {
-    public final static String VERSION_NO = "wcs-java-sdk-2.0.9";
+    public final static String VERSION_NO = "wcs-java-sdk-2.0.11";
     /**
      * 具体AK SK信息请从网宿云存储Web应用中(账号管理-密钥管理)处获取
      */
