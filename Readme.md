@@ -1,10 +1,11 @@
-## wcs-java-sdk
+![image](https://github.com/user-attachments/assets/93a44ff4-b55a-485d-8632-b30b898d1b01)## wcs-java-sdk
 
 wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（目前支持java平台使用，不适合android平台）。
 
  - [使用指南](#使用指南)
    - [准备开发环境](#准备开发环境)
    - [配置信息](#配置信息)
+   - [设置加密算法](#设置加密算法)
    - [文件上传](#文件上传)
      - [普通表单上传](#普通表单上传)
      - [分片上传](#分片上传)
@@ -28,7 +29,7 @@ wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（�
         <dependency>
             <groupId>com.chinanetcenter.wcs.sdk</groupId>
             <artifactId>wcs-java-sdk</artifactId>
-            <version>2.0.8</version>
+            <version>2.0.11</version>
         </dependency>
 
  - 使用GitHub下载
@@ -52,6 +53,37 @@ wcs-java-SDK基于网宿云存储API规范构建,支持Java 8及以上版本（�
     int connection_timeout = 30000;
     int socket_timeout = 60000;
     Config.init(ak,sk,PUT_URL,GET_URL,MGR_URL,'logfilePath',connection_timeout,socket_timeout);
+
+
+#### 设置加密算法
+新增了SM3加密算法支持，可以在SHA1和SM3两种加密算法之间进行选择。
+
+**配置方法**
+
+```
+Config类中，新增了ENCRYPTION_TYPE配置项，使用枚举类型EncryptionType，支持以下值：
+- EncryptionType.SHA1（默认值）：使用HMAC-SHA1算法进行签名
+- EncryptionType.SM3：使用SM3算法进行签名
+```
+**示例代码**
+
+```java
+// 使用SHA1算法
+Config.ENCRYPTION_TYPE = EncryptionType.SHA1;
+// 使用SM3算法
+Config.ENCRYPTION_TYPE = EncryptionType.SM3;
+``` 
+**HTTP请求头**
+
+SDK在发送HTTP请求时会自动添加`encryption-type`头部信息：
+- 当使用SHA1算法时，头部值为`SHA-1`
+- 当使用SM3算法时，头部值为`SM3`
+SDK会在每个HTTP请求方法中自动添加此头部，无需手动配置。
+
+**示例Demo**
+
+参考`src/main/java/com/chinanetcenter/api/demo/UploadDemo.java`中的示例代码，演示了如何使用不同的加密算法进行上传操作
+
 
 #### 计算上传凭证
 1、JavaScript、Android、iOS等移动端由于安全原因，不适合将AK、SK等敏感信息配置到前端直接计算token，java-SDK可作为这些前端SDK的token服务器。
