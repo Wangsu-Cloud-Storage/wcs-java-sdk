@@ -1,4 +1,8 @@
-## [中文版Readme](README.md)
+# Cloud Storage Java SDK
+
+## 语言 / Language
+- [简体中文](README.md)
+- [English](README.en.md)
 
 ## wcs-java-sdk
 

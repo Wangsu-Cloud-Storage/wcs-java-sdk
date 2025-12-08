@@ -1,4 +1,8 @@
-## [README of English](README.en.md)
+# 云存储 Java SDK
+
+## 语言 / Language
+- [简体中文](README.md)
+- [English](README.en.md)
 
 ## wcs-java-sdk
 
