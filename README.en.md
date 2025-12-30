@@ -7,7 +7,7 @@
 ## wcs-java-sdk
 
 ### Overview
-wcs-java-sdk is the official Java SDK provided by Wangsu Cloud Storage, which encapsulates the RESTful API of Wangsu Cloud Storage. It provides simple and reliable programming interfaces for developers to access Wangsu Cloud Storage services quickly.
+wcs-java-sdk is the official Java SDK provided by Wcs Cloud Storage, which encapsulates the RESTful API of Wcs Cloud Storage. It provides simple and reliable programming interfaces for developers to access Wcs Cloud Storage services quickly.
 
 ### Features
 - File upload (simple upload, multipart upload)
@@ -42,7 +42,7 @@ Add the following dependency to your project's pom.xml file:
 ### Quick Start
 
 #### Preparation
-- Register a Wangsu Cloud Storage account and obtain the Access Key (AK) and Secret Key (SK)
+- Register a Wcs Cloud Storage account and obtain the Access Key (AK) and Secret Key (SK)
 - Create a storage space (Bucket)
 - Obtain the upload domain, management domain, and download domain from the console
 
@@ -399,7 +399,7 @@ public class SliceUploadDemo {
 ```
 
 ### Resource Management
-Process files stored on Wangsu Cloud Storage, including deletion, listing resources, etc.
+Process files stored on Wcs Cloud Storage, including deletion, listing resources, etc.
 
 ##### Delete File
 
