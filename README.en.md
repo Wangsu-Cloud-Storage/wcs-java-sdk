@@ -1,128 +1,197 @@
 # Cloud Storage Java SDK
 
-## 语言 / Language
+## Language
+
 - [简体中文](README.md)
 - [English](README.en.md)
 
 ## wcs-java-sdk
 
-### Overview
-wcs-java-sdk is the official Java SDK provided by Wcs Cloud Storage, which encapsulates the RESTful API of Wcs Cloud Storage. It provides simple and reliable programming interfaces for developers to access Wcs Cloud Storage services quickly.
+wcs-java-SDK is built based on the wcs cloud storage API specification and supports Java 8 and above versions (currently supports Java platform use, not suitable for Android platform).
 
-### Features
-- File upload (simple upload, multipart upload)
-- File download
-- File management (delete, copy, move, get file information)
-- Resource listing
-- Audio and video processing
-- Image processing
-- Mirror resource update
+- [Usage Guide](#usage-guide)
+  - [Prepare Development Environment](#prepare-development-environment)
+  - [Configuration Information](#configuration-information)
+  - [Set Encryption Algorithm](#set-encryption-algorithm)
+  - [File Upload](#file-upload)
+    - [Normal Form Upload](#normal-form-upload)
+    - [Slice Upload](#slice-upload)
+  - [Resource Management](#resource-management)
+    - [Delete File](#delete-file)
+    - [Get File Information](#get-file-information)
+    - [List Resources](#list-resources)
+    - [Copy Resources](#copy-resources)
+    - [Move Resources](#move-resources)
+    - [Update Mirror Resources](#update-mirror-resources)
+    - [Delete Resources by Prefix](#delete-resources-by-prefix)
+  - [Audio and Video Operations](#audio-and-video-operations)
+  - [Fetch Resources](#fetch-resources)
+  - [Download Resources](#download-resources)
+  - [Calculate File ETag](#calculate-file-etag)
 
-### Environmental Requirements
-- JDK 1.6 or above
-- Maven 3.0 or above (for dependency management)
+### Usage Guide
 
-### Installation
+#### Prepare Development Environment
 
-#### Using Maven
-Add the following dependency to your project's pom.xml file:
-
-```xml
-<dependency>
-    <groupId>com.chinanetcenter.api</groupId>
-    <artifactId>wcs-java-sdk</artifactId>
-    <version>2.0.11</version>
-</dependency>
-```
-
-#### Manual Installation
-1. Download the wcs-java-sdk JAR file and its dependencies
-2. Add the downloaded JAR files to your project's classpath
-
-### Quick Start
-
-#### Preparation
-- Register a Wcs Cloud Storage account and obtain the Access Key (AK) and Secret Key (SK)
-- Create a storage space (Bucket)
-- Obtain the upload domain, management domain, and download domain from the console
+- Add dependencies in Maven project ([Get maven latest version](https://mvnrepository.com/artifact/com.chinanetcenter.wcs.sdk/wcs-java-sdk))
+  ```
+   <dependency>
+       <groupId>com.chinanetcenter.wcs.sdk</groupId>
+       <artifactId>wcs-java-sdk</artifactId>
+       <version>2.0.11</version>
+   </dependency>
+  ```
+- Download using GitHub
 
 #### Configuration Information
-```java
-import com.chinanetcenter.api.util.Config;
 
-public class Demo {
-    public static void main(String[] args) {
-        // Set AK and SK
-        Config.AK = "your-ak";
-        Config.SK = "your-sk";
-        
-        // Set upload domain and management domain
-        Config.PUT_URL = "your uploadDomain";
-        Config.MGR_URL = "your MgrDomain";
-    }
-}
+When users access wcs cloud storage, they need to use a pair of valid AK and SK for signature authentication, and fill in configuration information such as "upload domain" and "management domain" for file operations. The configuration information only needs to be initialized once in the entire application, as follows:
+
+- Open a wcs cloud storage platform account
+- Log in to the wcs cloud storage platform, view AK and SK under "Key Management" under "Security Management", and view upload and management domains under "Domain Query".
+
+After obtaining AK and SK information, you can initialize the information as follows:
+
+```
+import com.chinanetcenter.api.util.Config;
+//1. Initialize information
+String ak = "your access key";
+String sk = "your secrete key";
+String PUT_URL = "your uploadDomain";
+String GET_URL = "your downloadDomain";
+String MGR_URL = "your mgrDomain";
+int connection_timeout = 30000;
+int socket_timeout = 60000;
+Config.init(ak,sk,PUT_URL,GET_URL,MGR_URL,'logfilePath',connection_timeout,socket_timeout);
 ```
 
 #### Set Encryption Algorithm
-```java
-// Use MD5 encryption (default)
-Config.setAuth(AuthEnum.MD5);
 
-// Use HMAC-SHA1 encryption
-Config.setAuth(AuthEnum.SHA1);
+Added SM3 encryption algorithm support, you can choose between SHA1 and SM3 encryption algorithms.
+
+**Configuration Method**
+
+```
+In the Config class, a new ENCRYPTION_TYPE configuration item has been added, using the enumeration type EncryptionType, which supports the following values:
+- EncryptionType.SHA1 (default value): Use HMAC-SHA1 algorithm for signing
+- EncryptionType.SM3: Use SM3 algorithm for signing
 ```
 
-### File Upload
+**Example Code**
 
-#### Simple Upload
-Simple upload is suitable for small files (recommended for files less than 100MB).
+```java
+// Use SHA1 algorithm
+Config.ENCRYPTION_TYPE = EncryptionType.SHA1;
+// Use SM3 algorithm
+Config.ENCRYPTION_TYPE = EncryptionType.SM3;
+```
+
+**HTTP Request Header**
+
+The SDK will automatically add the `encryption-type` header information when sending HTTP requests:
+
+- When using SHA1 algorithm, the header value is `SHA-1`
+- When using SM3 algorithm, the header value is `SM3`
+  The SDK will automatically add this header in each HTTP request method, no need for manual configuration.
+
+**Example Demo**
+
+Refer to the sample code in `src/main/java/com/chinanetcenter/api/demo/UploadDemo.java`, which demonstrates how to use different encryption algorithms for upload operations
+
+#### Calculate Upload Credentials
+
+1. For security reasons, mobile terminals such as JavaScript, Android, and iOS are not suitable for configuring sensitive information such as AK and SK to the front end to directly calculate tokens. The java-SDK can be used as the token server for these front-end SDKs.
+
+**Example:**
+
+```
+bucketName = 'your bucket name';
+fileKey = 'your key name';
+PutPolicy putPolicy = new PutPolicy();		// Create PutPolicy object
+putPolicy.setOverwrite(1);    			// Configure overwrite upload
+putPolicy.setScope(bucketName + ":" + fileKey); // Configure scope to specify the space and file name for upload
+putPolicy.setDeadline("timestamp");		// Configure token expiration time, format is millisecond-level expiration timestamp
+String uploadToken = TokenUtil.getUploadToken(putPolicy);
+```
+
+#### File Upload
+
+1. returnUrl and callbackUrl cannot be specified at the same time.
+2. If the file size exceeds 20M, it is recommended to use slice upload
+3. The upload domain name provided by cloud storage is a normal domain name. If you are sensitive to upload speed and have requirements, it is recommended to use wcs upload acceleration service.
+4. SDK supports automatic file type identification (refer to demo uploadFileForAutoMimeType method)
+
+File upload is divided into three modes according to different usage scenarios: normal upload, callback upload, and notification upload. The upload method can choose normal form upload or slice upload according to the file size.
+
+1. Normal upload: After the user uploads the file, the upload return result is uniformly controlled by the cloud storage platform.
+2. Callback upload: After the user uploads the file, the information returned to the client is customized. It is necessary to enable the callbackUrl parameter of the upload policy data, and the callbackBody parameter is optional (it is recommended to use this parameter).
+3. Notification upload: While uploading files, users submit file processing instructions (including video transcoding, image watermarking, image scaling, etc.). It is necessary to enable the persistentOps parameter and persistentNotifyUrl parameter of the upload policy data.
 
 ##### Normal Form Upload
+
 **Example:**
-```java
-import com.chinanetcenter.api.entity.PutPolicy;
+
+```
 import com.chinanetcenter.api.entity.HttpClientResult;
+import com.chinanetcenter.api.entity.PutPolicy;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.util.Config;
 import com.chinanetcenter.api.util.DateUtil;
+import com.chinanetcenter.api.util.TokenUtil;
 import com.chinanetcenter.api.wsbox.FileUploadManage;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class UploadDemo {
+    FileUploadManage fileUploadManage = new FileUploadManage();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.PUT_URL = "your uploadDomain";
         String bucketName = "your-bucket";
-        String fileKey = "java-sdk/testfile.jpg";
-        String srcFilePath = "D:\\testfile\\test.jpg";
+        String fileKey = "test.JPG";
+        String fileKeyWithFolder = "folder/test.JPG";
+        String srcFilePath = "D:\\testfile\\1m.JPG";
         UploadDemo demo = new UploadDemo();
-        demo.upload(bucketName, fileKey, srcFilePath);
-        demo.uploadWithToken(bucketName, fileKey, srcFilePath);
-        demo.uploadReturnBody(bucketName, fileKey, srcFilePath);
-        demo.uploadMimeType(bucketName, fileKey, srcFilePath);
-        demo.uploadPersistent(bucketName, fileKey, srcFilePath);
+	//Upload local file
+	//Normal upload
+        demo.uploadFile(bucketName, fileKey, srcFilePath);
+	
+	//Upload with callback, return information. Specify folder
+        //demo.uploadReturnBody(bucketName, fileKeyWithFolder, srcFilePath);
+	
+	//Upload specified file type, server defaults to file suffix or file content
+        //demo.uploadMimeType(bucketName, fileKey, srcFilePath);
+	
+	//Preprocess file after upload
+        //demo.uploadPersistent(bucketName, fileKey, srcFilePath);
+	
+	//Auto identify file type
+	//demo.uploadFileForAutoMimeType(bucketName, fileKey, srcFilePath);
+	
+	//Upload file stream
+        //FileInputStream in = new FileInputStream(new File(srcFilePath));
+        //demo.uploadFile(bucketName, fileKey, in);
+        //demo.uploadFileForAutoMimeType(bucketName, fileKey, in);
     }
 
     /**
-     * Normal upload
+     * Upload file through local file path
+     * Default overwrite upload
      */
-    public void upload(String bucketName, String fileKey, String srcFilePath) {
-        PutPolicy putPolicy = new PutPolicy();
-        putPolicy.setOverwrite(1); // Overwrite upload
-        putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
-        putPolicy.setScope(bucketName + ":" + fileKey);
+    public void uploadFile(String bucketName,String fileKey,String srcFilePath){
         try {
-            FileUploadManage fileUploadManage = new FileUploadManage();
-            HttpClientResult result = fileUploadManage.upload(bucketName, fileKey, srcFilePath, putPolicy);
+            HttpClientResult result = fileUploadManage.upload(bucketName,fileKey,srcFilePath);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();
@@ -130,19 +199,12 @@ public class UploadDemo {
     }
 
     /**
-     * Upload with specified token
+     * Upload file through file stream, the method will close InputStream
+     * Default overwrite upload
      */
-    public void uploadWithToken(String bucketName, String fileKey, String srcFilePath) {
-        PutPolicy putPolicy = new PutPolicy();
-        putPolicy.setOverwrite(1);
-        putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
-        putPolicy.setScope(bucketName + ":" + fileKey);
+    public void uploadFile(String bucketName,String fileKey,InputStream in){
         try {
-            String uploadToken = TokenUtil.getUploadToken(putPolicy);
-            FileUploadManage fileUploadManage = new FileUploadManage();
-            Map<String, String> paramMap = new HashMap<String, String>();
-            paramMap.put("token", uploadToken);
-            HttpClientResult result = fileUploadManage.upload(paramMap, srcFilePath);
+            HttpClientResult result = fileUploadManage.upload(bucketName,fileKey,in);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();
@@ -150,17 +212,18 @@ public class UploadDemo {
     }
 
     /**
-     * Upload with return body, the server will return the specified content according to returnBody
+     * After uploading, callback, return information, etc. can be specified through PutPolicy
+     * callbackurl, callbackbody, returnurl similar to this method
      */
-    public void uploadReturnBody(String bucketName, String fileKey, String srcFilePath) {
+    public void uploadReturnBody(String bucketName,String fileKey,String srcFilePath){
         String returnBody = "key=$(key)&fname=$(fname)&fsize=$(fsize)&url=$(url)&hash=$(hash)&mimeType=$(mimeType)";
         PutPolicy putPolicy = new PutPolicy();
-        putPolicy.setOverwrite(1); // Overwrite upload
-        putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
+        putPolicy.setOverwrite(1); //Overwrite upload
+        putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1,new Date()).getTime()));
         putPolicy.setReturnBody(returnBody);
         putPolicy.setScope(bucketName + ":" + fileKey);
         try {
-            HttpClientResult result = fileUploadManage.upload(bucketName, fileKey, srcFilePath, putPolicy);
+            HttpClientResult result = fileUploadManage.upload(bucketName,fileKey,srcFilePath,putPolicy);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();
@@ -168,10 +231,10 @@ public class UploadDemo {
     }
 
     /**
-     * Upload with specified file type and file retention time. The server will default to file suffix or file content.
-     * If mimeType is specified, the Content-type will be set to this type when downloading.
+     * Upload specified file type, specified file save time, server defaults to file suffix or file content
+     * Specified mimeType, Content-type will be specified as this type when downloading
      */
-    public void uploadMimeType(String bucketName, String fileKey, String srcFilePath) {
+    public void uploadMimeType(String bucketName,String fileKey,String srcFilePath){
         PutPolicy putPolicy = new PutPolicy();
         putPolicy.setOverwrite(1);
         putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
@@ -181,8 +244,8 @@ public class UploadDemo {
             Map<String, String> paramMap = new HashMap<String, String>();
             paramMap.put("token", uploadToken);
             paramMap.put("mimeType", "application/UQ");
-            paramMap.put("deleteAfterDays", "365");
-            HttpClientResult result = fileUploadManage.upload(paramMap, srcFilePath);
+	    paramMap.put("deleteAfterDays", 365);
+            HttpClientResult result = fileUploadManage.upload(paramMap,srcFilePath);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();
@@ -190,57 +253,58 @@ public class UploadDemo {
     }
 
     /**
-     * Upload files and transcode them after upload.
-     * Returns persistentId after successful upload, which can be used to query transcoding status.
+     * Transcode the file after uploading
+     * After successful upload, return persistentId response, you can use this id to query the transcoding status
      */
-    public void uploadPersistent(String bucketName, String fileKey, String srcFilePath) {
+    public void uploadPersistent(String bucketName,String fileKey,String srcFilePath){
         PutPolicy putPolicy = new PutPolicy();
         String returnBody = "key=$(key)&persistentId=$(persistentId)&fsize=$(fsize)";
         putPolicy.setOverwrite(1);
         putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
         putPolicy.setScope(bucketName + ":" + fileKey);
-        putPolicy.setPersistentOps("imageMogr2/jpg/crop/500x500/gravity/CENTER/lowpoly/1|saveas/ZnV5enRlc3Q4Mi0wMDE6ZG9fY3J5c3RhbGxpemVfZ3Jhdml0eV9jZW50ZXJfMTQ2NTkwMDg0Mi5qcGc="); // Set video transcoding operations
+        putPolicy.setPersistentOps("imageMogr2/jpg/crop/500x500/gravity/CENTER/lowpoly/1|saveas/ZnV5enRlc3Q4Mi0wMDE6ZG9fY3J5c3RhbGxpemVfZ3Jhdml0eV9jZW50ZXJfMTQ2NTkwMDg0Mi5qcGc="); // Set video transcoding operation
         putPolicy.setPersistentNotifyUrl("http://demo1/notifyUrl"); // Set callback interface after transcoding
         putPolicy.setReturnBody(returnBody);
         try {
-            HttpClientResult result = fileUploadManage.upload(bucketName, fileKey, srcFilePath, putPolicy);
+            HttpClientResult result = fileUploadManage.upload(bucketName,fileKey,srcFilePath,putPolicy);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();
         }
     }
+	/**
+	 * Upload file through local file path, will automatically identify file type
+	 * Default overwrite upload
+	 */
+	public void uploadFileForAutoMimeType(String bucketName, String fileKey, String srcFilePath) {
+		try {
+			HttpClientResult result = fileUploadManage.uploadForAutoMimeType(bucketName, fileKey, srcFilePath);
+			System.out.println(result.getStatus() + ":" + result.getResponse());
+		} catch (WsClientException e) {
+			e.printStackTrace();
+		}
+	}
 
-    /**
-     * Upload files by local file path, will automatically identify file type
-     * Default overwrite upload
-     */
-    public void uploadFileForAutoMimeType(String bucketName, String fileKey, String srcFilePath) {
-        try {
-            HttpClientResult result = fileUploadManage.uploadForAutoMimeType(bucketName, fileKey, srcFilePath);
-            System.out.println(result.getStatus() + ":" + result.getResponse());
-        } catch (WsClientException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Upload files by input stream, the method will close InputStream, will automatically identify file type
-     * Default overwrite upload
-     */
-    public void uploadFileForAutoMimeType(String bucketName, String fileKey, InputStream in) {
-        try {
-            HttpClientResult result = fileUploadManage.uploadForAutoMimeType(bucketName, fileKey, in);
-            System.out.println(result.getStatus() + ":" + result.getResponse());
-        } catch (WsClientException e) {
-            e.printStackTrace();
-        }
-    }
+	/**
+	 * Upload file through file stream, the method will close InputStream, will automatically identify file type
+	 * Default overwrite upload
+	 */
+	public void uploadFileForAutoMimeType(String bucketName, String fileKey, InputStream in) {
+		try {
+			HttpClientResult result = fileUploadManage.uploadForAutoMimeType(bucketName, fileKey, in);
+			System.out.println(result.getStatus() + ":" + result.getResponse());
+		} catch (WsClientException e) {
+			e.printStackTrace();
+		}
+	}
 }
 ```
 
-##### Multipart Upload
+##### Slice Upload
+
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.PutPolicy;
 import com.chinanetcenter.api.entity.SliceUploadHttpResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -266,40 +330,40 @@ public class SliceUploadDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.PUT_URL = "your uploadDomain";
         String bucketName = "your-bucket";
         String fileKey = "java-sdk/com.toycloud.MeiYe.apk";
 
         String srcFilePath = "D:\\testfile\\test001\\com.toycloud.MeiYe.apk";
-
-        /**
-         * Set the size of each block to 4M. If network conditions are good, you can set 8M, 12M, 16M, etc. (multiples of 4M) to improve upload efficiency. The default value is 4M.
-         */
-        BaseBlockUtil.BLOCK_SIZE = 4 * 1024 * 1024;
-
-        /**
-         * Set the size of each slice to 4M to reduce upload requests. If network conditions are poor, it is not recommended to set this parameter or set it to a smaller value to avoid timeout. The default value is 256KB.
-         */
+	
+	/**
+	 * Set the size of each block to 4M, if the network condition is good, you can set 8M, 12M, 16M and other 4M multiples to improve upload efficiency. The default value of this parameter is 4M
+	 */
+	BaseBlockUtil.BLOCK_SIZE = 4 * 1024 * 1024;
+	
+	/**
+	 * Set each slice size to 4M to reduce upload requests. If the network environment is not good, it is not recommended to set this parameter or set it to a smaller value to avoid timeout. The default value of this parameter is 256KB
+	 */
         BaseBlockUtil.CHUNK_SIZE = 4 * 1024 * 1024;
-
-        /**
-         * Set the number of concurrent block uploads to speed up upload. If network conditions are poor, it is not recommended to set this parameter or set it to a smaller value to avoid timeout. The default value is 5.
-         */
-        BaseBlockUtil.THREAD_NUN = 5;
-
-        /**
-         * Set the number of retries for request timeout and server response exceptions. The default value is 3.
-         */
-        BaseBlockUtil.TRIED_TIMES = 5;
+	
+	/**
+	 * Set block upload concurrency to speed up upload. If the network environment is not good, it is not recommended to set this parameter or set it to a smaller value to avoid timeout. The default value of this parameter is 5
+	 */
+	BaseBlockUtil.THREAD_NUN = 5；
+	
+	/**
+	 * Set the number of retries for request timeout and server response exceptions. The default value of this parameter is 3
+	 */
+	BaseBlockUtil.TRIED_TIMES = 5；
         SliceUploadDemo demo = new SliceUploadDemo();
-        demo.sliceUpload(bucketName, fileKey, srcFilePath);
-        demo.sliceUploadForAutoMimeType(bucketName, fileKey, srcFilePath);
-        /**  Second way, key is not written to scope, but specified from head. Used for uploading multiple files with the same token.
+        demo.sliceUpload(bucketName,fileKey,srcFilePath);
+		demo.sliceUploadForAutoMimeType(bucketName, fileKey, srcFilePath);
+        /**  Second way, key is not written to scope, but specified from head for the same token can upload multiple files
         String fileKey2 = "java-sdk/com.toycloud.MeiYe2.apktest";
         String mimeType = "application/vnd.android.package-archive";
-        demo.sliceUpload(bucketName, fileKey2, srcFilePath, mimeType);
+        demo.sliceUpload(bucketName,fileKey2,srcFilePath,mimeType);
          */
     }
 
@@ -308,46 +372,45 @@ public class SliceUploadDemo {
         putPolicy.setScope(bucketName + ":" + fileKey);
         putPolicy.setOverwrite(1);
         putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
-        JSONObjectRet jsonObjectRet = getJSONObjectRet(bucketName, fileKey, filePath);
+        JSONObjectRet jsonObjectRet = getJSONObjectRet(bucketName,fileKey,filePath);
         SliceUploadResumable sliceUploadResumable = new SliceUploadResumable();
         sliceUploadResumable.execUpload(bucketName, fileKey, filePath, putPolicy, null, jsonObjectRet);
     }
 
-    public void sliceUpload(final String bucketName, final String fileKey, final String filePath, String mimeType) {
+    public void sliceUpload(final String bucketName, final String fileKey, final String filePath,String mimeType) {
         PutPolicy putPolicy = new PutPolicy();
         putPolicy.setScope(bucketName);
         putPolicy.setOverwrite(1);
         putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
-        JSONObjectRet jsonObjectRet = getJSONObjectRet(bucketName, fileKey, filePath);
+        JSONObjectRet jsonObjectRet = getJSONObjectRet(bucketName,fileKey,filePath);
         SliceUploadResumable sliceUploadResumable = new SliceUploadResumable();
-        Map<String, String> headMap = new HashMap<String, String>();
-        headMap.put("mimeType", mimeType);
+        Map<String,String> headMap = new HashMap<String, String>();
+        headMap.put("mimeType",mimeType);
         headMap.put("key", EncodeUtils.urlsafeEncode(fileKey));
-        sliceUploadResumable.execUpload(bucketName, fileKey, filePath, putPolicy, null, jsonObjectRet, headMap);
+        sliceUploadResumable.execUpload(bucketName, fileKey, filePath, putPolicy, null, jsonObjectRet,headMap);
     }
+	/**
+	 * Slice upload, will automatically identify file type
+	 *
+	 * @param bucketName
+	 * @param fileKey
+	 * @param filePath
+	 */
+	public void sliceUploadForAutoMimeType(final String bucketName, final String fileKey, final String filePath) {
+		PutPolicy putPolicy = new PutPolicy();
+		putPolicy.setScope(bucketName + ":" + fileKey);
+		putPolicy.setOverwrite(1);
+		putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
+		JSONObjectRet jsonObjectRet = getJSONObjectRet(bucketName, fileKey, filePath);
+		SliceUploadResumable sliceUploadResumable = new SliceUploadResumable();
+		sliceUploadResumable.execUploadForAutoMimeType(bucketName, fileKey, filePath, putPolicy, null, jsonObjectRet);
+	}
 
-    /**
-     * Multipart upload, will automatically identify file type
-     *
-     * @param bucketName
-     * @param fileKey
-     * @param filePath
-     */
-    public void sliceUploadForAutoMimeType(final String bucketName, final String fileKey, final String filePath) {
-        PutPolicy putPolicy = new PutPolicy();
-        putPolicy.setScope(bucketName + ":" + fileKey);
-        putPolicy.setOverwrite(1);
-        putPolicy.setDeadline(String.valueOf(DateUtil.nextDate(1, new Date()).getTime()));
-        JSONObjectRet jsonObjectRet = getJSONObjectRet(bucketName, fileKey, filePath);
-        SliceUploadResumable sliceUploadResumable = new SliceUploadResumable();
-        sliceUploadResumable.execUploadForAutoMimeType(bucketName, fileKey, filePath, putPolicy, null, jsonObjectRet);
-    }
-
-    public JSONObjectRet getJSONObjectRet(final String bucketName, final String fileKey, final String filePath) {
+    public JSONObjectRet getJSONObjectRet(final String bucketName,final String fileKey,final String filePath){
         return new JSONObjectRet() {
             /**
-             * This method will be called back after successful file upload
-             * Check if the hash of the uploaded file is consistent with the hash of the local file. If not, the local file may have been modified.
+             * This method will be called back after the file is uploaded successfully
+             * Check whether the hash of the uploaded file is consistent with the hash of the local file, if not consistent, the local file may have been modified
              */
             @Override
             public void onSuccess(JsonNode obj) {
@@ -372,22 +435,22 @@ public class SliceUploadDemo {
                 if (ex instanceof WsClientException) {
                     WsClientException wsClientException = (WsClientException) ex;
                     System.out.println(wsClientException.code + ":" + wsClientException.getMessage());
-                } else {
+                }else {
                     ex.printStackTrace();
                 }
-                System.out.println("Upload error, " + ex.getMessage());
+                System.out.println("Upload error," + ex.getMessage());
             }
 
-            // Progress bar display, this method will be called back after each block is uploaded successfully
+            // Progress bar display, this method is called back every time a block is uploaded successfully
             @Override
             public void onProcess(long current, long total) {
                 System.out.printf("%s\r", current * 100 / total + " %");
             }
 
             /**
-             * Persistence, save progress information during resumable upload. Assign JSONObject to PutExtra when uploading again.
-             * The SDK saves information to disk files by default. If needed, please save it to the database yourself.
-             * Assign the value to the PutExtra parameter when resuming upload next time.
+             * Persistence, save progress information during breakpoint resume, and assign JSONObject to PutExtra when uploading next time
+             * The sdk saves the information to the disk file by default, if needed, please save it to db yourself
+             * When resuming upload next time, assign the value to the PutExtra parameter
              */
             @Override
             public void onPersist(JsonNode obj) {
@@ -398,13 +461,15 @@ public class SliceUploadDemo {
 }
 ```
 
-### Resource Management
-Process files stored on Wcs Cloud Storage, including deletion, listing resources, etc.
+#### Resource Management
+
+Process files stored on wcs cloud storage, including deletion, listing resources, etc.
 
 ##### Delete File
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.util.Config;
@@ -415,7 +480,7 @@ public class DeleteDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
@@ -432,10 +497,12 @@ public class DeleteDemo {
 ```
 
 ##### Get File Information
-Get the information description of a file, including file name, file size, ETag information, etc.
+
+Get information about a file, including file name, file size, file ETag information, etc.
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.util.Config;
@@ -446,7 +513,7 @@ public class StatDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
@@ -463,10 +530,12 @@ public class StatDemo {
 ```
 
 ##### List Resources
-List resources in the specified bucket.
+
+List resources in the specified space
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.FileListObject;
 import com.chinanetcenter.api.entity.FileMessageObject;
 import com.chinanetcenter.api.entity.HttpClientResult;
@@ -483,7 +552,7 @@ public class ListDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
@@ -527,11 +596,13 @@ public class ListDemo {
 }
 ```
 
-##### Copy Resource
-Copy the specified resource to a newly named resource. If a resource with the same name exists in the target bucket, it will not be overwritten.
+##### Copy Resources
+
+Copy the specified resource as a newly named resource. If there is a resource with the same name in the target space, it will not be overwritten.
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.util.Config;
@@ -542,7 +613,7 @@ public class CopyDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
@@ -551,7 +622,7 @@ public class CopyDemo {
         String newFileKey = "java-sdk/testfile2.jpg";
         OperationManager fileManageCommand = new OperationManager();
         try {
-            HttpClientResult result = fileManageCommand.copy(bucketName, fileKey, newBucketName, newFileKey);
+            HttpClientResult result = fileManageCommand.copy(bucketName, fileKey,newBucketName,newFileKey);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();
@@ -560,11 +631,13 @@ public class CopyDemo {
 }
 ```
 
-##### Move Resource
-Move the specified resource from the source bucket to the target bucket, or rename the resource within the same bucket. If a resource with the same name exists in the target bucket, it will not be overwritten.
+##### Move Resources
+
+Move the specified resource from the source space to the target space, or rename the resource within the same space. If there is a resource with the same name in the target space, it will not be overwritten.
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.util.Config;
@@ -575,7 +648,7 @@ public class MoveDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
@@ -593,11 +666,13 @@ public class MoveDemo {
 }
 ```
 
-##### Update Mirror Resource
-For buckets with mirror storage set up, it provides the function to fetch specified resources from the mirror source site and store them in the bucket. If a resource with the same name already exists in the bucket, it will be overwritten by the resource from the mirror source site.
+##### Update Mirror Resources
+
+For spaces with mirror storage set, it provides the function of fetching specified resources from the mirror source site and storing them in the space. If there is a resource with the same name in the space, it will be overwritten by the resource from the mirror source site.
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.util.Config;
@@ -610,7 +685,7 @@ public class PreFetchDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
@@ -636,23 +711,26 @@ public class PreFetchDemo {
 ```
 
 ##### Delete Resources by Prefix
-You can delete all resources with a common prefix by specifying a prefix, such as specifying prefix=html/ to delete all files in the html directory under the root path. 【Note: This interface is an asynchronous deletion method】
 
-```java
+You can delete all resources with a common prefix by specifying a prefix, such as specifying prefix=html/, delete all files in the html directory under the root path. 【Note: This interface is an asynchronous deletion method】
+
+```
 List<FmgrParam> list = new ArrayList<FmgrParam>();
 FmgrParam fmgrParam = new FmgrParam();
 fmgrParam.setBucket(bucketName);
 fmgrParam.setPrefix("aac");
-String notifyURL = "http://demo1/notifyUrl";  // Notification address, optional
-HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list);  // Deletion result is not notified
-HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list, notifyURL); // Deletion interface notifies the specified address
+String notifyURL = "http://demo1/notifyUrl";  //Notification address, not required
+HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list);  // Delete result not notified
+HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list, notifyURL); //Delete interface notify to specified address
 ```
 
-### Audio and Video Operations
-Provide audio and video processing functions, including: transcoding and repackaging, audio and video splicing, decompression, etc. For specific processing parameters, please refer to [Audio and Video Processing Ops Parameter Format](#document/API/Appendix/fopsParam#audio-video-processing)
+#### Audio and Video Operations
+
+Provide audio and video processing functions, including: transcoding and repackaging, audio and video splicing, decompression and other operations. For specific processing parameters, please refer to [Audio and Video Processing Ops Parameter Format](#document/API/Appendix/fopsParam#音视频处理)
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
 import com.chinanetcenter.api.util.Config;
@@ -664,29 +742,29 @@ public class FopsDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
         String fileKey = "java-sdk/10m2.mp4";
-        // Set transcoding operation parameters
+        //Set transcoding operation parameters
         String fops = "avthumb/mp4/s/640x360/vb/1.25m";
-        // You can use the saveas parameter to customize the name of the transcoded file,
-        // or you can not specify it, it will be named by default and saved in the current bucket. Base64 encode the targetBucket_Name:custom file key.
+        //You can use saveas parameter to customize the name of the transcoded file,
+        //or you can not specify it, it will be named by default and saved in the current space  base64 for targetBucket_Name:custom file key.
         String saveAsKey = EncodeUtils.urlsafeEncode(bucketName + ":1.256m.jpg");
         fops += "|saveas/" + saveAsKey;
-        String notifyURL = "http://demo1/notifyUrl";  // Notification address, will callback this address after successful transcoding
+        String notifyURL = "http://demo1/notifyUrl";  //Notification address, will callback this address after successful transcoding
         String force = "1";
         String separate = "1";
         FopsDemo demo = new FopsDemo();
-        demo.fileTrans(bucketName, fileKey, fops, notifyURL, force, separate);
+        demo.fileTrans(bucketName,fileKey,fops,notifyURL,force,separate);
 
     }
 
-    public void fileTrans(String bucketName, String fileKey, String fops, String notifyURL, String force, String separate) {
+    public void fileTrans(String bucketName, String fileKey, String fops, String notifyURL, String force,String separate) {
         OperationManager fileManageCommand = new OperationManager();
         try {
-            HttpClientResult result = fileManageCommand.fops(bucketName, fileKey, fops, notifyURL, force, separate);
+            HttpClientResult result = fileManageCommand.fops(bucketName, fileKey, fops, notifyURL,force,separate);
             System.out.println(result.getStatus() + ":" + result.getResponse());
         } catch (WsClientException e) {
             e.printStackTrace();
@@ -695,11 +773,13 @@ public class FopsDemo {
 }
 ```
 
-### Fetch Resource
-Provide the function to fetch resources from the specified URL and store them in the specified bucket.
+#### Fetch Resources
+
+Provide fetching resources from a specified URL and storing them in a specified space.
 
 **Example:**
-```java
+
+```
 import com.chinanetcenter.api.entity.FmgrParam;
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -714,7 +794,7 @@ public class FmgrFetchDemo {
         Config.AK = "your-ak";
         Config.SK = "your-sk";
         /**
-         * You can get uploadDomain and MgrDomain from the user management interface - Security Management - Domain Name Query, need to add http://
+         * You can get uploadDomain, MgrDomain in user management interface - security management - domain query, need to add http://
          */
         Config.MGR_URL = "your MgrDomain";
         String bucketName = "your-bucket";
@@ -725,15 +805,15 @@ public class FmgrFetchDemo {
             fmgrParam.setBucket(bucketName);
             fmgrParam.setFetchURL("https://wcs.chinanetcenter.com/indexNew/image/pic1.jpg");
             fmgrParam.setFileKey("indexNew/image/pic1.jpg");
-            fmgrParam.putExtParams("fetchTS", "0");
+	    fmgrParam.putExtParams("fetchTS", "0");
             list.add(fmgrParam);
             FmgrParam fmgrParam2 = new FmgrParam();
             fmgrParam2.setBucket(bucketName);
             fmgrParam2.setFetchURL("https://wcs.chinanetcenter.com/indexNew/image/pic2.m3u8");
             fmgrParam2.setFileKey("indexNew/image/pic2.m3u8");
-            fmgrParam.putExtParams("fetchTS", "0");
+	    fmgrParam.putExtParams("fetchTS", "0");
             list.add(fmgrParam2);
-            String notifyURL = "http://demo1/notifyUrl";  // Notification address, will callback this address after successful transcoding
+            String notifyURL = "http://demo1/notifyUrl";  //Notification address, will callback this address after successful transcoding
             String force = "1";
             String separate = "1";
             HttpClientResult result = fileManageCommand.fmgrFetch(list, notifyURL, force, separate);
@@ -745,10 +825,11 @@ public class FmgrFetchDemo {
 }
 ```
 
-### Download Resource
-Provide the function to download resources from the specified domain name and resource name.
+#### Download Resources
 
-```java
+Provide downloading resources from specified domain name and resource name.
+
+```
 /**
  * Download file
  */
@@ -768,10 +849,11 @@ public class DownloadDemo {
 }
 ```
 
-### Calculate ETag
-Calculate the ETag value of the local file, which can be used to compare with the ETag value of the file stored in cloud storage to verify whether the file is complete.
+#### Calculate ETag
 
-```java
+Calculate the etag value of the local file, which can be used to compare with the etag value of the file stored on cloud storage to verify whether the file is complete
+
+```
 File fileHash = new File(filePath);
 String eTagHash = WetagUtil.getEtagHash(fileHash);// Calculate hash based on file content
 ```

@@ -1,6 +1,7 @@
 # 云存储 Java SDK
 
 ## 语言 / Language
+
 - [简体中文](README.md)
 - [English](README.en.md)
 
@@ -8,60 +9,64 @@
 
 wcs-java-SDK基于wcs云存储API规范构建,支持Java 8及以上版本（目前支持java平台使用，不适合android平台）。
 
- - [使用指南](#使用指南)
-   - [准备开发环境](#准备开发环境)
-   - [配置信息](#配置信息)
-   - [设置加密算法](#设置加密算法)
-   - [文件上传](#文件上传)
-     - [普通表单上传](#普通表单上传)
-     - [分片上传](#分片上传)
-   - [资源管理](#资源管理)
-     - [删除文件](#删除文件)
-     - [获取文件信息](#获取文件信息)
-     - [列举资源](#列举资源)
-     - [复制资源](#复制资源)
-     - [移动资源](#移动资源)
-     - [更新镜像资源](#更新镜像资源)
-     - [按前缀删除资源](#按前缀删除资源)
-   - [音视频操作](#音视频操作)
-   - [抓取资源](#抓取资源)
-   - [下载资源](#下载资源)
-   - [计算文件etag](#计算etag)
+- [使用指南](#使用指南)
+  - [准备开发环境](#准备开发环境)
+  - [配置信息](#配置信息)
+  - [设置加密算法](#设置加密算法)
+  - [文件上传](#文件上传)
+    - [普通表单上传](#普通表单上传)
+    - [分片上传](#分片上传)
+  - [资源管理](#资源管理)
+    - [删除文件](#删除文件)
+    - [获取文件信息](#获取文件信息)
+    - [列举资源](#列举资源)
+    - [复制资源](#复制资源)
+    - [移动资源](#移动资源)
+    - [更新镜像资源](#更新镜像资源)
+    - [按前缀删除资源](#按前缀删除资源)
+  - [音视频操作](#音视频操作)
+  - [抓取资源](#抓取资源)
+  - [下载资源](#下载资源)
+  - [计算文件etag](#计算etag)
 
 ### 使用指南
+
 #### 准备开发环境
- - 在Maven项目中加入依赖项（[获取maven最新版本](https://mvnrepository.com/artifact/com.chinanetcenter.wcs.sdk/wcs-java-sdk)）
 
-        <dependency>
-            <groupId>com.chinanetcenter.wcs.sdk</groupId>
-            <artifactId>wcs-java-sdk</artifactId>
-            <version>2.0.11</version>
-        </dependency>
-
- - 使用GitHub下载
-
+- 在Maven项目中加入依赖项（[获取maven最新版本](https://mvnrepository.com/artifact/com.chinanetcenter.wcs.sdk/wcs-java-sdk)）
+  ```
+   <dependency>
+       <groupId>com.chinanetcenter.wcs.sdk</groupId>
+       <artifactId>wcs-java-sdk</artifactId>
+       <version>2.0.11</version>
+   </dependency>
+  ```
+- 使用GitHub下载
 
 #### 配置信息
+
 用户接入wcs云存储时，需要使用一对有效的AK和SK进行签名认证，并填写“上传域名”和“管理域名”等配置信息进行文件操作。配置信息只需要在整个应用程序中初始化一次即可，具体操作如下：
 
- - 开通wcs云存储平台账户
- - 登录wcs云存储平台，在“安全管理”下的“密钥管理”查看AK和SK，“域名查询”查看上传、管理域名。
+- 开通wcs云存储平台账户
+- 登录wcs云存储平台，在“安全管理”下的“密钥管理”查看AK和SK，“域名查询”查看上传、管理域名。
 
 在获取到AK和SK等信息之后，您可以按照如下方式进行信息初始化：
 
-    import com.chinanetcenter.api.util.Config;
-    //1.初始化信息
-    String ak = "your access key";
-    String sk = "your secrete key";
-    String PUT_URL = "your uploadDomain";
-    String GET_URL = "your downloadDomain";
-    String MGR_URL = "your mgrDomain";
-    int connection_timeout = 30000;
-    int socket_timeout = 60000;
-    Config.init(ak,sk,PUT_URL,GET_URL,MGR_URL,'logfilePath',connection_timeout,socket_timeout);
-
+```
+import com.chinanetcenter.api.util.Config;
+//1.初始化信息
+String ak = "your access key";
+String sk = "your secrete key";
+String PUT_URL = "your uploadDomain";
+String GET_URL = "your downloadDomain";
+String MGR_URL = "your mgrDomain";
+int connection_timeout = 30000;
+int socket_timeout = 60000;
+Config.init(ak,sk,PUT_URL,GET_URL,MGR_URL,'logfilePath',connection_timeout,socket_timeout);
+```
 
 #### 设置加密算法
+
 新增了SM3加密算法支持，可以在SHA1和SM3两种加密算法之间进行选择。
 
 **配置方法**
@@ -71,6 +76,7 @@ Config类中，新增了ENCRYPTION_TYPE配置项，使用枚举类型EncryptionT
 - EncryptionType.SHA1（默认值）：使用HMAC-SHA1算法进行签名
 - EncryptionType.SM3：使用SM3算法进行签名
 ```
+
 **示例代码**
 
 ```java
@@ -78,23 +84,26 @@ Config类中，新增了ENCRYPTION_TYPE配置项，使用枚举类型EncryptionT
 Config.ENCRYPTION_TYPE = EncryptionType.SHA1;
 // 使用SM3算法
 Config.ENCRYPTION_TYPE = EncryptionType.SM3;
-``` 
+```
+
 **HTTP请求头**
 
 SDK在发送HTTP请求时会自动添加`encryption-type`头部信息：
+
 - 当使用SHA1算法时，头部值为`SHA-1`
 - 当使用SM3算法时，头部值为`SM3`
-SDK会在每个HTTP请求方法中自动添加此头部，无需手动配置。
+  SDK会在每个HTTP请求方法中自动添加此头部，无需手动配置。
 
 **示例Demo**
 
 参考`src/main/java/com/chinanetcenter/api/demo/UploadDemo.java`中的示例代码，演示了如何使用不同的加密算法进行上传操作
 
-
 #### 计算上传凭证
+
 1、JavaScript、Android、iOS等移动端由于安全原因，不适合将AK、SK等敏感信息配置到前端直接计算token，java-SDK可作为这些前端SDK的token服务器。
 
 **范例：**
+
 ```
 bucketName = 'your bucket name';
 fileKey = 'your key name';
@@ -106,19 +115,22 @@ String uploadToken = TokenUtil.getUploadToken(putPolicy);
 ```
 
 #### 文件上传
+
 1. returnUrl和callbackUrl不能同时指定。
 2. 若文件大小超过20M，建议使用分片上传
 3. 云存储提供的上传域名为普通域名，若对上传速度较为敏感，有要求的客户建议采用wcs上传加速服务。
 4. SDK支持自动识别文件类型（参考demo uploadFileForAutoMimeType方法）
 
 文件上传根据使用场景的不同分为三种模式：普通上传，回调上传，通知上传。上传方式可根据文件大小选择普通的表单上传或者分片上传。
+
 1. 普通上传：用户在上传文件后，上传返回结果由云存储平台统一控制。
 2. 回调上传：用户上传文件后，对返回给客户端的信息进行自定义。需要启用上传策略数据的callbackUrl参数,而callbackBody参数可选（建议使用该参数）。
 3. 通知上传：用户在上传文件的同时，提交文件处理指令（包括视频转码，图片水印，图片缩放等操作）。需要启用上传策略数据的persistentOps参数和persistentNotifyUrl参数。
 
-
 ##### 普通表单上传
+
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.entity.PutPolicy;
@@ -289,7 +301,9 @@ public class UploadDemo {
 ```
 
 ##### 分片上传
+
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.PutPolicy;
 import com.chinanetcenter.api.entity.SliceUploadHttpResult;
@@ -448,11 +462,13 @@ public class SliceUploadDemo {
 ```
 
 #### 资源管理
+
 对存储在wcs云存储上的文件进行处理，包括删除、列举资源等。
 
 ##### 删除文件
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -481,9 +497,11 @@ public class DeleteDemo {
 ```
 
 ##### 获取文件信息
+
 获取一个文件的信息描述，包括文件名，文件大小，文件的ETag信息等
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -512,9 +530,11 @@ public class StatDemo {
 ```
 
 ##### 列举资源
+
 列举指定空间内的资源
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.FileListObject;
 import com.chinanetcenter.api.entity.FileMessageObject;
@@ -575,10 +595,13 @@ public class ListDemo {
     }
 }
 ```
+
 ##### 复制资源
+
 将指定资源复制为新命名的资源。如果目标空间存在同名资源，不会覆盖。
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -609,9 +632,11 @@ public class CopyDemo {
 ```
 
 ##### 移动资源
+
 将源空间的指定资源移动到目标空间，或在同一空间内对资源重命名。如果目标空间存在同名资源，不会覆盖。
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -642,9 +667,11 @@ public class MoveDemo {
 ```
 
 ##### 更新镜像资源
+
 对于设置了镜像存储的空间，提供从镜像源站抓取指定资源并存储到该空间中的功能。 如果该空间中已存在同名资源，则会被镜像源站的资源覆盖。
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -682,8 +709,11 @@ public class PreFetchDemo {
     }
 }
 ```
+
 ##### 按前缀删除资源
+
 可以通过指定前缀，删除所有有共同前缀的资源，如指定prefix=html/，删除根路径下，html目录内的所有文件。 【注：该接口为异步删除方式】
+
 ```
 List<FmgrParam> list = new ArrayList<FmgrParam>();
 FmgrParam fmgrParam = new FmgrParam();
@@ -695,9 +725,11 @@ HttpClientResult result = fileManageCommand.fmgrDeletePrefix(list, notifyURL); /
 ```
 
 #### 音视频操作
+
 提供音视频处理功能，包括：转码转封装、音视频拼接、解压缩等操作。具体处理参数详见[音视频处理Ops参数格式](#document/API/Appendix/fopsParam#音视频处理)
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.HttpClientResult;
 import com.chinanetcenter.api.exception.WsClientException;
@@ -740,10 +772,13 @@ public class FopsDemo {
     }
 }
 ```
+
 #### 抓取资源
+
 提供从指定URL抓取资源，并存储到指定空间。
 
 **范例：**
+
 ```
 import com.chinanetcenter.api.entity.FmgrParam;
 import com.chinanetcenter.api.entity.HttpClientResult;
@@ -791,7 +826,9 @@ public class FmgrFetchDemo {
 ```
 
 #### 下载资源
+
 提供从指定域名和资源名下载资源。
+
 ```
 /**
  * 下载文件
@@ -813,8 +850,11 @@ public class DownloadDemo {
 ```
 
 #### 计算etag
+
 计算本地文件的etag值，可用于和存储在云存储上文件的etag值做比对，校验文件是否完整
+
 ```
 File fileHash = new File(filePath);
 String eTagHash = WetagUtil.getEtagHash(fileHash);// 根据文件内容计算hash
 ```
+
